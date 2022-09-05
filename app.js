@@ -1,10 +1,10 @@
-var express = require('express');
-var path = require('path');
-var logger = require('morgan');
+require('dotenv').config()
+const express = require('express');
+const path = require('path');
+const logger = require('morgan');
+const routerV1 = require('./routes/apiV1');
 
-var routerV1 = require('./routes/apiV1');
-
-var app = express();
+const app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
