@@ -39,9 +39,19 @@ const TEST_TOKEN_RESPONSE = {
     token_type: "bearer"
 }
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+    jest.resetAllMocks()
+    repository.AppClient.findByPk.mockResolvedValueOnce(TEST_APP_CLIENT);
+    repository.AppGrant.findByPk.mockResolvedValueOnce(TEST_APP_GRANT);
+    getValidatedSubjectTokenInfo.mockResolvedValueOnce(VALIDATED_SUBJECT_TOKEN_INFO);
+    repository.Idp.findOne.mockResolvedValueOnce(TEST_IDP);
+    repository.AppIdp.findByPk.mockResolvedValueOnce(TEST_APP_IDP);
+    repository.UserScope.findAll.mockResolvedValueOnce(TEST_USER_SCOPES);
+    buildAccessToken.mockResolvedValueOnce(TEST_ACCESS_TOKEN);
+});
 
 test('Given unknown client When exchangeToken Expect Error invalid_client', async () => {
+    repository.AppClient.findByPk.mockReset();
     repository.AppClient.findByPk.mockResolvedValueOnce(null);
     await expect(
         () => exchangeService.exchangeToken(
@@ -50,6 +60,7 @@ test('Given unknown client When exchangeToken Expect Error invalid_client', asyn
 })
 
 test('Given app not authorized for grant_type When exchangeToken Expect Error unauthorized_client', async () => {
+    repository.AppGrant.findByPk.mockReset();
     repository.AppClient.findByPk.mockResolvedValueOnce(TEST_APP_CLIENT);
     repository.AppGrant.findByPk.mockResolvedValueOnce(null);
     await expect(() => exchangeService.exchangeToken(
@@ -58,8 +69,7 @@ test('Given app not authorized for grant_type When exchangeToken Expect Error un
 })
 
 test('Given invalid subject token When exchangeToken Expect Error invalid_grant', async () => {
-    repository.AppClient.findByPk.mockResolvedValueOnce(TEST_APP_CLIENT);
-    repository.AppGrant.findByPk.mockResolvedValueOnce(TEST_APP_GRANT);
+    getValidatedSubjectTokenInfo.mockReset();
     getValidatedSubjectTokenInfo.mockImplementationOnce(
         jest.fn().mockRejectedValueOnce(new Error(error.ERROR_VALIDATING_SUBJECT_TOKEN)));
     await expect(() => exchangeService.exchangeToken(
@@ -68,9 +78,7 @@ test('Given invalid subject token When exchangeToken Expect Error invalid_grant'
 });
 
 test('Given unknown IDP When exchangeToken Expect Error invalid_target', async () => {
-    repository.AppClient.findByPk.mockResolvedValueOnce(TEST_APP_CLIENT);
-    repository.AppGrant.findByPk.mockResolvedValueOnce(TEST_APP_GRANT);
-    getValidatedSubjectTokenInfo.mockResolvedValueOnce(VALIDATED_SUBJECT_TOKEN_INFO);
+    repository.Idp.findOne.mockReset();
     repository.Idp.findOne.mockResolvedValueOnce(null);
     await expect(() => exchangeService.exchangeToken(
         GRANT_TYPE_TOKEN_EXCHANGE, TEST_CLIENT, TEST_SUBJECT_TOKEN, SUBJECT_TOKEN_TYPE_JWT))
@@ -78,10 +86,9 @@ test('Given unknown IDP When exchangeToken Expect Error invalid_target', async (
 });
 
 test('Given app not linked to IDP When exchangeToken Expect Error invalid_target', async () => {
+    repository.AppIdp.findByPk.mockReset();
     repository.AppClient.findByPk.mockResolvedValueOnce(TEST_APP_CLIENT);
     repository.AppGrant.findByPk.mockResolvedValueOnce(TEST_APP_GRANT);
-    getValidatedSubjectTokenInfo.mockResolvedValueOnce(VALIDATED_SUBJECT_TOKEN_INFO);
-    repository.Idp.findOne.mockResolvedValueOnce(TEST_IDP);
     repository.AppIdp.findByPk.mockResolvedValueOnce(null);
     await expect(() => exchangeService.exchangeToken(
         GRANT_TYPE_TOKEN_EXCHANGE, TEST_CLIENT, TEST_SUBJECT_TOKEN, SUBJECT_TOKEN_TYPE_JWT))
@@ -89,11 +96,7 @@ test('Given app not linked to IDP When exchangeToken Expect Error invalid_target
 });
 
 test('Given no user scopes registered When exchangeToken Expect Error invalid_scope', async () => {
-    repository.AppClient.findByPk.mockResolvedValueOnce(TEST_APP_CLIENT);
-    repository.AppGrant.findByPk.mockResolvedValueOnce(TEST_APP_GRANT);
-    getValidatedSubjectTokenInfo.mockResolvedValueOnce(VALIDATED_SUBJECT_TOKEN_INFO);
-    repository.Idp.findOne.mockResolvedValueOnce(TEST_IDP);
-    repository.AppIdp.findByPk.mockResolvedValueOnce(TEST_APP_IDP);
+    repository.UserScope.findAll.mockReset();
     repository.UserScope.findAll.mockResolvedValueOnce(null);
     await expect(() => exchangeService.exchangeToken(
         GRANT_TYPE_TOKEN_EXCHANGE, TEST_CLIENT, TEST_SUBJECT_TOKEN, SUBJECT_TOKEN_TYPE_JWT))
@@ -101,12 +104,7 @@ test('Given no user scopes registered When exchangeToken Expect Error invalid_sc
 });
 
 test('Given error building access token When exchangeToken Expect Error internal_server_error', async () => {
-    repository.AppClient.findByPk.mockResolvedValueOnce(TEST_APP_CLIENT);
-    repository.AppGrant.findByPk.mockResolvedValueOnce(TEST_APP_GRANT);
-    getValidatedSubjectTokenInfo.mockResolvedValueOnce(VALIDATED_SUBJECT_TOKEN_INFO);
-    repository.Idp.findOne.mockResolvedValueOnce(TEST_IDP);
-    repository.AppIdp.findByPk.mockResolvedValueOnce(TEST_APP_IDP);
-    repository.UserScope.findAll.mockResolvedValueOnce(TEST_USER_SCOPES);
+    buildAccessToken.mockReset();
     buildAccessToken.mockImplementationOnce(
         jest.fn().mockRejectedValueOnce(new Error(error.ERROR_BUILDING_TOKEN)));
     await expect(() => exchangeService.exchangeToken(
@@ -115,13 +113,6 @@ test('Given error building access token When exchangeToken Expect Error internal
 });
 
 test('Given valid input When exchangeToken Expect null FOR NOW', async () => {
-    repository.AppClient.findByPk.mockResolvedValueOnce(TEST_APP_CLIENT);
-    repository.AppGrant.findByPk.mockResolvedValueOnce(TEST_APP_GRANT);
-    getValidatedSubjectTokenInfo.mockResolvedValueOnce(VALIDATED_SUBJECT_TOKEN_INFO);
-    repository.Idp.findOne.mockResolvedValueOnce(TEST_IDP);
-    repository.AppIdp.findByPk.mockResolvedValueOnce(TEST_APP_IDP);
-    repository.UserScope.findAll.mockResolvedValueOnce(TEST_USER_SCOPES);
-    buildAccessToken.mockResolvedValueOnce(TEST_ACCESS_TOKEN);
     await expect(exchangeService.exchangeToken(
         GRANT_TYPE_TOKEN_EXCHANGE, TEST_CLIENT, TEST_SUBJECT_TOKEN, SUBJECT_TOKEN_TYPE_JWT))
         .resolves

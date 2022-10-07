@@ -14,7 +14,7 @@ const TOKEN_TYPE_JWT = 'urn:ietf:params:oauth:token-type:jwt';
 const TOKEN_TYPE_BEARER = 'bearer';
 const EXPIRES_IN_1800 = 1800;
 
-async function getAppClient(clientId) {
+async function findAppClient(clientId) {
     let appClient = await repository.AppClient.findByPk(clientId);
     if (!appClient) {
         winston.error(LOG_INVALID_CLIENT, clientId);
@@ -76,7 +76,7 @@ async function buildTokenResponse(token, scopes) {
 }
 
 async function exchangeToken(grantType, clientId, subjectToken, subjectTokenType) {
-    const appClient = await getAppClient(clientId);
+    const appClient = await findAppClient(clientId);
     await validateGrantAuthorizedForApp(appClient.appId, grantType);
     const subjectTokenInfo = await getValidatedSubjectTokenInfo(subjectToken);
     await validateAppAuthorizedForIdp(appClient.appId, subjectTokenInfo.issuer);
