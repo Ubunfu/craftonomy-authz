@@ -23,6 +23,8 @@ const VALID_REQUEST = {
     }
 }
 
+beforeEach(() => jest.resetAllMocks());
+
 test('Given invalid content-type When validate Expect Error', () => {
     let req = getClone(VALID_REQUEST);
     req.get = () => {
@@ -62,7 +64,9 @@ test('Given missing subject_token_type When validateRequest Expect Error', () =>
 
 test('Given grant type is not token-exchange When validateRequest Expect Error', () => {
     let req = getClone(VALID_REQUEST);
-    req.get = () => { return CONTENT_TYPE_X_WWW_FORM_URLENCODED };
+    req.get = () => {
+        return CONTENT_TYPE_X_WWW_FORM_URLENCODED
+    };
     req.body.grant_type = GRANT_TYPE_CLIENT_CREDENTIALS;
     expect(() => validatorService.validateRequest(req))
         .toThrow(errors.ERROR_UNSUPPORTED_GRANT_TYPE);
@@ -70,8 +74,18 @@ test('Given grant type is not token-exchange When validateRequest Expect Error',
 
 test('Given subject token type is not JWT When validateRequest Expect Error', () => {
     let req = getClone(VALID_REQUEST);
-    req.get = () => { return CONTENT_TYPE_X_WWW_FORM_URLENCODED };
+    req.get = () => {
+        return CONTENT_TYPE_X_WWW_FORM_URLENCODED
+    };
     req.body.subject_token_type = SUBJECT_TOKEN_TYPE_ACCESS_TOKEN;
     expect(() => validatorService.validateRequest(req))
         .toThrow(errors.ERROR_UNSUPPORTED_SUBJECT_TOKEN_TYPE);
 })
+
+test('Given valid request parameters When validateRequest Expect no errors thrown', async () => {
+    let req = getClone(VALID_REQUEST);
+    req.get = () => {
+        return CONTENT_TYPE_X_WWW_FORM_URLENCODED
+    };
+    expect(validatorService.validateRequest(req)).resolves;
+});

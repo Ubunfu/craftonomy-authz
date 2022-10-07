@@ -27,7 +27,8 @@ async function exchangeToken(grantType, clientId, subjectToken, subjectTokenType
     const appClient = await getAppClient(clientId);
     await validateGrantAuthorizedForClient(clientId, grantType);
     await getValidatedSubjectTokenInfo(subjectToken);
-    return client;
+    // TODO
+    return null;
 }
 
 module.exports = {
