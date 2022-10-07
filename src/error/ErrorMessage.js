@@ -11,6 +11,10 @@ const errors = {
     ERROR_VALIDATING_SUBJECT_TOKEN: 'invalid_grant: error validating subject token',
     ERROR_READING_OIDC_CONFIG: 'internal_server_error: unable to read oidc config',
     ERROR_GETTING_SIGNING_KEY: 'invalid_grant: error getting signing key',
+    ERROR_INVALID_APP_IDP: 'invalid_target: app not authorized for IDP',
+    ERROR_UNKNOWN_IDP: 'invalid_target: unknown IDP',
+    ERROR_NO_USER_SCOPES: 'invalid_scope: no scopes registered for user',
+    ERROR_BUILDING_TOKEN: 'internal_server_error: error building token'
 }
 
 module.exports = errors;

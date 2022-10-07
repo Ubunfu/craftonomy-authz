@@ -9,6 +9,8 @@ const TEST_SUBJECT_TOKEN = 'eyJraWQiOiJwaEVoOW9uZFg4dDFDcVZBU0I1R3RXTUtHYWJtdXdV
 const TEST_SUBJECT_TOKEN_INVALID = 'sdf';
 const TEST_SUBJECT_TOKEN_SUB = '85e2a700-fb8e-47bb-970f-a3bcc5275962';
 const TEST_SIGNING_KEY = 'testSigningKey';
+const TEST_EMAIL = 'user@mail.com';
+const TEST_USERNAME = 'userA';
 const TEST_OIDC_CONFIG_RESP = {
     data: {
         issuer: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_u9hvQAw2m",
@@ -34,7 +36,16 @@ const TEST_SUBJECT_TOKEN_DECODED = {
     payload: {
         iss: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_u9hvQAw2m",
         sub: "85e2a700-fb8e-47bb-970f-a3bcc5275962",
+        email: TEST_EMAIL,
+        'cognito:username': TEST_USERNAME
     }
+}
+const VALIDATED_SUBJECT_TOKEN_INFO = {
+    email: TEST_EMAIL,
+    username: TEST_USERNAME,
+    issuer: TEST_OIDC_CONFIG_RESP.data.issuer,
+    subject: TEST_SUBJECT_TOKEN_SUB,
+    keyId: TEST_JWKS_RESP.data.keys[0].kid,
 }
 
 jest.mock('axios');
@@ -77,9 +88,5 @@ test('Given valid subject token When getValidatedSubjectTokenInfo Expect returns
     jsonwebtoken.verify.mockResolvedValueOnce(null);
     jwksProviderService.getSigningKey.mockResolvedValueOnce(TEST_SIGNING_KEY);
     await expect(validatorService.getValidatedSubjectTokenInfo(TEST_SUBJECT_TOKEN))
-        .resolves.toEqual({
-            issuer: TEST_OIDC_CONFIG_RESP.data.issuer,
-            subject: TEST_SUBJECT_TOKEN_SUB,
-            keyId: TEST_JWKS_RESP.data.keys[0].kid,
-        });
+        .resolves.toEqual(VALIDATED_SUBJECT_TOKEN_INFO);
 });

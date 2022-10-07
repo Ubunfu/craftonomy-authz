@@ -27,6 +27,8 @@ async function getSubjectTokenInfo(subjectToken) {
     try {
         const token = await decode(subjectToken, { complete: true, json: true });
         return {
+            email: token.payload.email,
+            username: token.payload['cognito:username'],
             issuer: token.payload.iss,
             subject: token.payload.sub,
             keyId: token.header.kid,

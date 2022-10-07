@@ -4,16 +4,15 @@ const {validateRequest} = require('../service/OAuthRequestValidatorService');
 const {handle} = require('../error/ErrorHandler')
 const {exchangeToken} = require("../service/TokenExchangeService");
 
-router.post('/token', function(req, res, next) {
+router.post('/token', async function(req, res, next) {
   try {
     validateRequest(req);
-    exchangeToken(
+    res.send(await exchangeToken(
         req.body.grant_type,
         req.body.client_id,
         req.body.subject_token,
         req.body.subject_token_type,
-    );
-    res.send({data: "nice"});
+    ));
   } catch (e) {
     handle(e, res)
   }
