@@ -1,8 +1,8 @@
 const error = require('../error/ErrorMessage')
-const repository = require('../repository/MemoryAuthzRepository')
 const winston = require('winston')
-const {getValidatedSubjectTokenInfo} = require('./SubjectTokenValidatorService');
-const {buildAccessToken} = require("./TokenBuilderService");
+const subjectTokenValidator = require('./SubjectTokenValidatorService');
+const tokenBuilder = require("./TokenBuilderService");
+const db = require('./DatabaseService');
 
 const LOG_INVALID_CLIENT = 'Invalid client ID: %s';
 const LOG_UNAUTHORIZED_GRANT = 'Grant type %s not authorized for app: %s';
@@ -14,38 +14,39 @@ const TOKEN_TYPE_JWT = 'urn:ietf:params:oauth:token-type:jwt';
 const TOKEN_TYPE_BEARER = 'bearer';
 
 async function findAppClient(clientId) {
-    let appClient = await repository.AppClient.findByPk(clientId);
-    if (!appClient) {
+    try {
+        return await db.findAppClient(clientId);
+    } catch (e) {
         winston.error(LOG_INVALID_CLIENT, clientId);
         throw Error(error.ERROR_INVALID_CLIENT);
     }
-    return appClient;
 }
 
 async function validateGrantAuthorizedForApp(appId, grantType) {
-    let appGrant = await repository.AppGrant.findByPk(appId, grantType);
-    if (!appGrant) {
+    try {
+        return await db.findAppGrant(appId, grantType);
+    } catch (e) {
         winston.error(LOG_UNAUTHORIZED_GRANT, grantType, appId);
         throw Error(error.ERROR_UNAUTHORIZED_GRANT_TYPE);
     }
 }
 
 async function findIdpByIssuerUrl(issuerUrl) {
-    const idp = await repository.Idp.findOne({where: {issuerUrl: issuerUrl}});
-    if (!idp) {
+    try {
+        return await db.findIdpByIssuerUrl(issuerUrl);
+    } catch (e) {
         winston.error(LOG_UNKNOWN_ISSUER, issuerUrl);
         throw Error(error.ERROR_UNKNOWN_IDP);
     }
-    return idp;
 }
 
 async function findAppIdpByPk(appId, idpId) {
-    const appIdp = await repository.AppIdp.findByPk(appId, idpId);
-    if (!appIdp) {
+    try {
+        return await db.findAppIdp(appId, idpId);
+    } catch (e) {
         winston.error(LOG_UNAUTHORIZED_IDP, idpId, appId);
         throw Error(error.ERROR_INVALID_APP_IDP);
     }
-    return appIdp;
 }
 
 async function validateAppAuthorizedForIdp(appId, issuerUrl) {
@@ -54,8 +55,10 @@ async function validateAppAuthorizedForIdp(appId, issuerUrl) {
 }
 
 async function findUserScopesByEmail(email) {
-    const userScopes = await repository.UserScope.findAll({where: {email: email}});
-    if (!userScopes) {
+    let userScopes;
+    try {
+        userScopes = await db.findUserScopesByEmail(email);
+    } catch (e) {
         winston.error(LOG_NO_USER_SCOPES, email);
         throw Error(error.ERROR_NO_USER_SCOPES);
     }
@@ -77,10 +80,10 @@ async function buildTokenResponse(token, scopes) {
 async function exchangeToken(grantType, clientId, subjectToken, subjectTokenType) {
     const appClient = await findAppClient(clientId);
     await validateGrantAuthorizedForApp(appClient.appId, grantType);
-    const subjectTokenInfo = await getValidatedSubjectTokenInfo(subjectToken);
+    const subjectTokenInfo = await subjectTokenValidator.getValidatedSubjectTokenInfo(subjectToken);
     await validateAppAuthorizedForIdp(appClient.appId, subjectTokenInfo.issuer);
     const userScopes = await findUserScopesByEmail(subjectTokenInfo.email);
-    const token = await buildAccessToken(
+    const token = await tokenBuilder.buildAccessToken(
         clientId, subjectTokenInfo.email, subjectTokenInfo.subject, subjectTokenInfo.username, userScopes);
     return await buildTokenResponse(token, userScopes);
 }

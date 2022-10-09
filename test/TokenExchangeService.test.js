@@ -1,12 +1,13 @@
 const exchangeService = require('../src/service/TokenExchangeService')
 const error = require('../src/error/ErrorMessage')
-const repository = require('../src/repository/MemoryAuthzRepository')
 const {getValidatedSubjectTokenInfo} = require('../src/service/SubjectTokenValidatorService');
 const {buildAccessToken} = require('../src/service/TokenBuilderService')
+const dbService = require('../src/service/DatabaseService');
 
-jest.mock('../src/repository/MemoryAuthzRepository')
+
 jest.mock('../src/service/SubjectTokenValidatorService')
 jest.mock('../src/service/TokenBuilderService')
+jest.mock('../src/service/DatabaseService')
 jest.mock('winston')
 
 const TEST_CLIENT = 'TEST_CLIENT';
@@ -41,19 +42,19 @@ const TEST_TOKEN_RESPONSE = {
 
 beforeEach(() => {
     jest.resetAllMocks()
-    repository.AppClient.findByPk.mockResolvedValueOnce(TEST_APP_CLIENT);
-    repository.AppGrant.findByPk.mockResolvedValueOnce(TEST_APP_GRANT);
+    dbService.findAppClient.mockResolvedValueOnce(TEST_APP_CLIENT);
+    dbService.findAppGrant.mockResolvedValueOnce(TEST_APP_GRANT);
     getValidatedSubjectTokenInfo.mockResolvedValueOnce(VALIDATED_SUBJECT_TOKEN_INFO);
-    repository.Idp.findOne.mockResolvedValueOnce(TEST_IDP);
-    repository.AppIdp.findByPk.mockResolvedValueOnce(TEST_APP_IDP);
-    repository.UserScope.findAll.mockResolvedValueOnce(TEST_USER_SCOPES);
+    dbService.findIdpByIssuerUrl.mockResolvedValueOnce(TEST_IDP);
+    dbService.findAppIdp.mockResolvedValueOnce(TEST_APP_IDP);
+    dbService.findUserScopesByEmail.mockResolvedValueOnce(TEST_USER_SCOPES);
     buildAccessToken.mockResolvedValueOnce(TEST_ACCESS_TOKEN);
     process.env.TOKEN_VALIDITY_SEC = 1800;
 });
 
 test('Given unknown client When exchangeToken Expect Error invalid_client', async () => {
-    repository.AppClient.findByPk.mockReset();
-    repository.AppClient.findByPk.mockResolvedValueOnce(null);
+    dbService.findAppClient.mockReset();
+    dbService.findAppClient.mockRejectedValue(null);
     await expect(
         () => exchangeService.exchangeToken(
             GRANT_TYPE_TOKEN_EXCHANGE, TEST_CLIENT, TEST_SUBJECT_TOKEN, SUBJECT_TOKEN_TYPE_JWT))
@@ -61,9 +62,8 @@ test('Given unknown client When exchangeToken Expect Error invalid_client', asyn
 })
 
 test('Given app not authorized for grant_type When exchangeToken Expect Error unauthorized_client', async () => {
-    repository.AppGrant.findByPk.mockReset();
-    repository.AppClient.findByPk.mockResolvedValueOnce(TEST_APP_CLIENT);
-    repository.AppGrant.findByPk.mockResolvedValueOnce(null);
+    dbService.findAppGrant.mockReset();
+    dbService.findAppGrant.mockRejectedValue(null);
     await expect(() => exchangeService.exchangeToken(
         GRANT_TYPE_TOKEN_EXCHANGE, TEST_CLIENT, TEST_SUBJECT_TOKEN, SUBJECT_TOKEN_TYPE_JWT))
         .rejects.toThrow(error.ERROR_UNAUTHORIZED_GRANT_TYPE);
@@ -79,26 +79,24 @@ test('Given invalid subject token When exchangeToken Expect Error invalid_grant'
 });
 
 test('Given unknown IDP When exchangeToken Expect Error invalid_target', async () => {
-    repository.Idp.findOne.mockReset();
-    repository.Idp.findOne.mockResolvedValueOnce(null);
+    dbService.findIdpByIssuerUrl.mockReset();
+    dbService.findIdpByIssuerUrl.mockRejectedValue(null);
     await expect(() => exchangeService.exchangeToken(
         GRANT_TYPE_TOKEN_EXCHANGE, TEST_CLIENT, TEST_SUBJECT_TOKEN, SUBJECT_TOKEN_TYPE_JWT))
         .rejects.toThrow(error.ERROR_UNKNOWN_IDP);
 });
 
 test('Given app not linked to IDP When exchangeToken Expect Error invalid_target', async () => {
-    repository.AppIdp.findByPk.mockReset();
-    repository.AppClient.findByPk.mockResolvedValueOnce(TEST_APP_CLIENT);
-    repository.AppGrant.findByPk.mockResolvedValueOnce(TEST_APP_GRANT);
-    repository.AppIdp.findByPk.mockResolvedValueOnce(null);
+    dbService.findAppIdp.mockReset();
+    dbService.findAppIdp.mockRejectedValue(null);
     await expect(() => exchangeService.exchangeToken(
         GRANT_TYPE_TOKEN_EXCHANGE, TEST_CLIENT, TEST_SUBJECT_TOKEN, SUBJECT_TOKEN_TYPE_JWT))
         .rejects.toThrow(error.ERROR_INVALID_APP_IDP);
 });
 
 test('Given no user scopes registered When exchangeToken Expect Error invalid_scope', async () => {
-    repository.UserScope.findAll.mockReset();
-    repository.UserScope.findAll.mockResolvedValueOnce(null);
+    dbService.findUserScopesByEmail.mockReset();
+    dbService.findUserScopesByEmail.mockRejectedValue(null);
     await expect(() => exchangeService.exchangeToken(
         GRANT_TYPE_TOKEN_EXCHANGE, TEST_CLIENT, TEST_SUBJECT_TOKEN, SUBJECT_TOKEN_TYPE_JWT))
         .rejects.toThrow(error.ERROR_NO_USER_SCOPES);
