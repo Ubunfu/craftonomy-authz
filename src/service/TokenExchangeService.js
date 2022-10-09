@@ -12,7 +12,6 @@ const LOG_NO_USER_SCOPES = 'No scopes found for user identified by email: %s';
 
 const TOKEN_TYPE_JWT = 'urn:ietf:params:oauth:token-type:jwt';
 const TOKEN_TYPE_BEARER = 'bearer';
-const EXPIRES_IN_1800 = 1800;
 
 async function findAppClient(clientId) {
     let appClient = await repository.AppClient.findByPk(clientId);
@@ -70,7 +69,7 @@ async function buildTokenResponse(token, scopes) {
         access_token: token,
         issued_token_type: TOKEN_TYPE_JWT,
         token_type: TOKEN_TYPE_BEARER,
-        expires_in: EXPIRES_IN_1800,
+        expires_in: parseInt(process.env.TOKEN_VALIDITY_SEC),
         scope: scopes
     };
 }

@@ -48,6 +48,7 @@ beforeEach(() => {
     repository.AppIdp.findByPk.mockResolvedValueOnce(TEST_APP_IDP);
     repository.UserScope.findAll.mockResolvedValueOnce(TEST_USER_SCOPES);
     buildAccessToken.mockResolvedValueOnce(TEST_ACCESS_TOKEN);
+    process.env.TOKEN_VALIDITY_SEC = 1800;
 });
 
 test('Given unknown client When exchangeToken Expect Error invalid_client', async () => {
