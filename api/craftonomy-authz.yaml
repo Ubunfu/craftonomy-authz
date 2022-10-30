@@ -1,0 +1,278 @@
+openapi: 3.0.3
+info:
+  title: Craftonomy Authorization API
+  description: |-
+    This API enables parties that have successfully authenticated with an 
+    identity provider trusted by the Craftonomy authorization platform to 
+    exchange proof of their successful authentication for an OAuth 2.0 access
+    token representing authorization for use of select Craftonomy platform APIs.
+  license:
+    name: GPLv3
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
+  version: 1.0.0
+externalDocs:
+  description: Craftonomy Authorization Server Repo
+  url: https://github.com/Ubunfu/craftonomy-authz
+servers:
+  - url: https://authz.craftonomy.net
+paths:
+  /api/v1/oauth2/token:
+    post:
+      tags:
+        - OAuth 2.0
+      summary: Obtain an OAuth 2.0 access token
+      description: |
+        Exchange an ID token from a trusted OIDC-compliant identity provider for
+        an OAuth 2.0 access token that provides authorization to use
+        Craftonomy platform APIs.
+      operationId: oauth2TokenExchange
+      requestBody:
+        description: OAuth 2.0 Token-Exchange request parameters
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/reqTokenExchange'
+        required: true
+      responses:
+        '200':
+          description: |
+            OK
+            
+            Authorization successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resTokenExchange200'
+        '400':
+          description: |
+            Bad Request
+            
+            Returned if the request is not valid, or if the `subject_token` is 
+            either invalid for any reason or unacceptable based on policy.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resTokenExchange400'
+        '500':
+          description: Internal Server Error
+  /api/v1/oauth2/keySets:
+    get:
+      tags:
+        - OAuth 2.0
+      summary: JSON Web Keys
+      description: |
+        Returns JWKs describing keys that can be used to verify cryptographic signatures of signed JWT access 
+        tokens issued by the authorization server.
+      operationId: keySets
+      responses:
+        '200':
+          description: |
+            OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resKeySets200'
+  /.well-known/openid-configuration:
+    get:
+      tags:
+        - OIDC
+      summary: OpenID provider metadata
+      description: Obtain OpenID provider configuration metadata
+      operationId: openIdProviderMetadata
+      responses:
+        '200':
+          description: |
+            OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resOpenIdMetadata200'
+components:
+  schemas:
+    reqTokenExchange:
+      type: object
+      required:
+        - grant_type
+        - client_id
+        - subject_token
+        - subject_token_type
+      properties:
+        grant_type:
+          type: string
+          description: |
+            The value urn:ietf:params:oauth:grant-type:token-exchange indicates that a token exchange is being 
+            performed.
+          enum:
+            - urn:ietf:params:oauth:grant-type:token-exchange
+          example: urn:ietf:params:oauth:grant-type:token-exchange
+        client_id:
+          type: string
+          description: |
+            The client identifier of the OAuth 2.0
+               [RFC6749] client that requested the token.
+          example: craftonomy_ui_1968db4b-8b4c-488d-83b6-7e52681041cd
+        scope:
+          type: string
+          description: |
+            A list of space-delimited, case-sensitive strings, as defined in Section 3.3 of [RFC6749], that allow the 
+            client to specify the desired scope of the requested security token in the context of the service or 
+            resource where the token will be used.
+          example: "shop.addItem shop.updateItem wallet.read wallet.transfer"
+        subject_token:
+          type: string
+          description: |
+            A security token that represents the identity of the party on behalf of whom the request is being made. This 
+            implementation requires that it be a signed, JWT-format, ID token issued by an OIDC-compliant identity
+            provider that is trusted by the Craftonomy platform.
+          example: |
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdF9oYXNoIjoiMnpfRmhOSld6MjRSbkRBb0Q4T3BBUSIsInN1YiI6Ijg1ZTJhNzAwLWZiOGUtNDdiYi05NzBmLWEzYmNjNTI3NTk2MiIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczovL2NvZ25pdG8taWRwLnVzLWVhc3QtMS5hbWF6b25hd3MuY29tL3VzLWVhc3QtMV91OWh2UUF3Mm0iLCJjb2duaXRvOnVzZXJuYW1lIjoicnlhbiIsIm9yaWdpbl9qdGkiOiI5OTI1ZmZmMy1iYTNhLTQwN2UtYWQzNC1mOTI2ZjQ3MWMyOTciLCJhdWQiOiJmaDlva2VnbnZnMGozbmo3Ym80M2VtNTR1IiwiZXZlbnRfaWQiOiI3ZTNmYWQ3Ni1kYzU4LTQyMjItYTA0NS01NGY4NGE1MTcxMTgiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTY2MjI5NjYzMywiZXhwIjoxNjYyMzAwMjMzLCJpYXQiOjE2NjIyOTY2MzQsImp0aSI6IjRhNDRkMjFiLWE2Y2MtNDRjNi05ZWQwLTg0OWMwYWVjYjQ5MyIsImVtYWlsIjoidXNlckBnbWFpbC5jb20ifQ.zXH4TeAvTJpXMu3yo7tazwFW3JsMbaWRtlgFsyEgCHc
+        subject_token_type:
+          type: string
+          description: |
+            An identifier, as described in Section 3 of [RFC8693], that indicates the type of the security token in the 
+            subject_token parameter.
+          enum:
+            - urn:ietf:params:oauth:token-type:jwt
+          example: urn:ietf:params:oauth:token-type:jwt
+    resTokenExchange200:
+      type: object
+      required:
+        - access_token
+        - issued_token_type
+        - token_type
+        - scope
+        - expires_in
+      properties:
+        access_token:
+          type: string
+          description: |
+            The security token issued by the authorization server in response to the token exchange request.
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6ImF0K2p3dCIsImtpZCI6IlJqRXdPd09BIn0.eyJpc3MiOiJodHRwczovL2F1dGh6LmNyYWZ0b25vbXkubmV0IiwiZXhwIjoxNjkzODM2MjUwLCJhdWQiOlsiaHR0cHM6Ly9hcGkuY3JhZnRvbm9teS5uZXQiXSwic3ViIjoiODVlMmE3MDAtZmI4ZS00N2JiLTk3MGYtYTNiY2M1Mjc1OTYyIiwiY2xpZW50X2lkIjoiY3JhZnRvbm9teV91aV8xOTY4ZGI0Yi04YjRjLTQ4OGQtODNiNi03ZTUyNjgxMDQxY2QiLCJpYXQiOjE2NjIzMDE0NzUsImp0aSI6IjI4MzkyYmM3LWVhNTUtNDQ1ZC05ZjQ0LTI1ZGMzODM0NzA5NSIsImVtYWlsIjoidXNlckBnbWFpbC5jb20iLCJ1c2VybmFtZSI6InJ5YW4iLCJzY29wZSI6InNob3AuYWRkSXRlbSBzaG9wLnVwZGF0ZUl0ZW0gd2FsbGV0LnJlYWQgd2FsbGV0LnRyYW5zZmVyIn0.RsGo26JAIPiJQNOgQ2lySuJIWkYkPSniRZYDBloI4lhNILQ1lktu2Rmwu9C7OIL_NMRYAwqldoWC1dwvTGhKis9uQuXJETfQ8Hg_BSmm8ZhYf60CvOr2xdAbWyIVTyhe5hmHqkEDwByZCZWBdYj5Dov94Ixt8yVyl-b_O0thfIKYDkLzpPDIutX2HFEvlFpTOsvwPHBh1EkFoSQhYfnqBYKVJGk3S40SKtbqhdNjT23VqaC17OdYOOh3Mkbyhm_zpnpj8vGnJ5Px7a_iN-5eOS0gtEXTefXtFCYnNNNdEIvVbbh6-v91jhOxeI_BiiYjtDyF8d7DRnAhHGsCnYRmeA
+        issued_token_type:
+          type: string
+          description: |
+            An identifier for the representation of the issued security token, 
+            as described in Section 3 of [RFC8693].
+          enum:
+            - urn:ietf:params:oauth:token-type:jwt
+          example: 'urn:ietf:params:oauth:token-type:jwt'
+        token_type:
+          type: string
+          description: |
+            A case-insensitive value specifying the method of using the access token issued, as specified in Section 7.1 of [RFC6749].
+          example: 'bearer'
+        expires_in:
+          type: number
+          description: |
+            The validity lifetime, in seconds, of the token issued by the authorization server.
+          example: 1800
+        scope:
+          type: string
+          description: |
+            List of scopes granted to the security token by the authorization 
+            server.
+          example: "shop.addItem shop.updateItem wallet.read wallet.transfer"
+    resTokenExchange400:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          enum:
+            - invalid_request
+            - unsupported_grant_type
+            - invalid_scope
+          example: 'invalid_request'
+        error_description:
+          type: string
+          description: |
+            Additional information regarding the reasons for the error
+          example: 'Invalid subject_token'
+    resOpenIdMetadata200:
+      type: object
+      required:
+        - issuer
+        - token_endpoint
+        - jwks_uri
+      properties:
+        issuer:
+          type: string
+          description: |
+            URL using the https scheme with no query or fragment component that the authorization server asserts as its 
+            Issuer Identifier.
+          example: https://authz.craftonomy.net
+        token_endpoint:
+          type: string
+          description: |
+            URL of the authorization server's OAuth 2.0 Token Endpoint.
+          example: https://authz.craftonomy.net/api/v1/oauth2/token
+        jwks_uri:
+          type: string
+          description: |
+            URL of the authorization server's JSON Web Key Set [JWK] document. This contains the signing key(s) resource
+            servers use to validate signatures from the authorization server.
+          example: https://authz.craftonomy.net/api/v1/oauth2/keySets
+    resKeySets200:
+      type: object
+      required:
+        - keys
+      properties:
+        keys:
+          type: array
+          description: |
+            The value of the "keys" member is an array of JWK values.  By default, the order of the JWK values within 
+            the array does not imply an order of preference among them, although applications of JWK Sets can choose to 
+            assign a meaning to the order for their purposes, if desired.
+          items:
+            $ref: '#/components/schemas/jsonWebKey'
+    jsonWebKey:
+      type: object
+      description: |
+        A JSON Web Key (JWK) is a JavaScript Object Notation (JSON) [RFC7159] data structure that represents a 
+        cryptographic key.
+      required:
+        - kty
+        - use
+        - alg
+        - kid
+        - x5c
+      properties:
+        kty:
+          type: string
+          description: |
+            The "kty" (key type) member identifies the cryptographic algorithm family used with the key, such as "RSA" 
+            or "EC".
+          example: RSA
+        use:
+          type: string
+          description: |
+            The "use" (public key use) member identifies the intended use of the public key.  The "use" parameter is 
+            employed to indicate whether a public key is used for encrypting data or verifying the signature on data.
+          enum:
+            - sig
+            - enc
+          example: sig
+        alg:
+          type: string
+          description: |
+            The "alg" (algorithm) member identifies the algorithm intended for use with the key.
+          example: RS256
+        kid:
+          type: string
+          description: |
+            The "kid" (key ID) member is used to match a specific key.  This is used, for instance, to choose among a 
+            set of keys within a JWK Set during key rollover.  The "kid" value is a case-sensitive string.
+          example: RjEwOwOA
+        x5c:
+          type: array
+          description: |
+            The "x5c" (X.509 Certificate Chain) member contains a chain of one or more PKIX certificates [RFC5280].  The
+            certificate chain is represented as a JSON array of certificate value strings.  Each string in the array is 
+            a base64 encoded ([RFC4648] Section 4 -- not base64url encoded) DER [ITU.X690.1994] PKIX certificate value.  
+            The PKIX certificate containing the key value MUST be the first certificate.  This MAY be followed by 
+            additional certificates, with each subsequent certificate being the one used to certify the previous one.  
+            The key in the first certificate MUST match the public key represented by other members of the JWK.
+          items:
+            type: string
+            example: MIICljCCAX4CCQDYrPhBkCKvkzANBgkqhkiG9w0BAQsFADANMQswCQYDVQQGEwJVUzAeFw0yMjA5MDUwMzMzMDNaFw0yMzA5MDUwMzMzMDNaMA0xCzAJBgNVBAYTAlVTMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAm0H8edWLAVsJPtg4k/rrnwu0fmW2gKhgrtfAxbYhp+YRysOppv2NklWwSkyk/CtvAUkKQ9WvpVea9GrNE0rFxHj+S2gyppGFyHCvqBfaOd+bFxTO3jJK0ZSlYQ2W72T0AZJWTNyO1mSriXKm/o0P8v34QFPnaSLhfq+GUmZg4NSn3pjx2dbxQ8WKQYjz/orXh/0e6ZFh37XCGHYe8J8qIho7pTXC9ui6qB2J2nIG2LkTCjo9legb4n8gbbI5PMFLmfnDz1FyQeRBkdA2lP1xhnID4bDRl3Nz0sLn6vG5FBgNAHjRc8fVBTC74BPX+F1ClORFdqDLCpWo1Kei7EhvRQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQAatmWdUTOUJCH4CbY9TMxNk6tDaFtFteV+8pi6+Na/WkJSdh0NvJeoMDzsHOqBZmMFQD0FMZ2EIEGeqB7FUNL1I4pakGEIHKZJJEsrGZJ+BWIlMEo/eVlCaHHRv534ue4mEOphX2SeZQkTpMYzSveBU4ShsvLMfakTDVXXpCx91SyE8PvuIpkjiAdbrCLd5ujkPP/56jhz+TXCSusaI7M+dBldVF/ujm1mTfBTlOViLAIIoypznynsq+2nRRigMZ5CncdhXD9UFNXDw6+D1U8CZkgR27CcdOYYXa85NcjGu4n1A44u7+HttQaEQTMcoivSXH9coi7+XVWy4I3MRkbX
