@@ -1,6 +1,6 @@
 const winston = require("winston");
 const jwksClient = require('jwks-rsa');
-const error = require('../error/ErrorMessage')
+const error = require('../../error/ErrorMessage')
 
 const LOG_ERROR_GETTING_SIGNING_KEY = 'Unable to retrieve signing key with ID: %s from provider %s';
 

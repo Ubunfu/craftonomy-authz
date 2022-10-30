@@ -1,4 +1,4 @@
-const errors = require("../error/ErrorMessage");
+const errors = require("../../error/ErrorMessage");
 const winston = require('winston')
 
 const GRANT_TYPE_TOKEN_EXCHANGE = 'urn:ietf:params:oauth:grant-type:token-exchange';

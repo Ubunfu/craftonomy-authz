@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
-const {validateRequest} = require('../service/OAuthRequestValidatorService');
+const {validateRequest} = require('../service/validator/OAuthRequestValidatorService');
 const {handle} = require('../error/ErrorHandler')
-const {exchangeToken} = require("../service/TokenExchangeService");
+const {exchangeToken} = require("../service/token/TokenExchangeService");
 
 router.post('/token', async function(req, res, next) {
   try {

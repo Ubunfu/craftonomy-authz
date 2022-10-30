@@ -1,8 +1,8 @@
-const error = require('../error/ErrorMessage')
+const error = require('../../error/ErrorMessage')
 const winston = require('winston')
-const subjectTokenValidator = require('./SubjectTokenValidatorService');
+const subjectTokenValidator = require('../validator/SubjectTokenValidatorService');
 const tokenBuilder = require("./TokenBuilderService");
-const db = require('./DatabaseService');
+const db = require('../db/DatabaseService');
 
 const LOG_INVALID_CLIENT = 'Invalid client ID: %s';
 const LOG_UNAUTHORIZED_GRANT = 'Grant type %s not authorized for app: %s';
@@ -72,7 +72,7 @@ async function buildTokenResponse(token, scopes) {
         access_token: token,
         issued_token_type: TOKEN_TYPE_JWT,
         token_type: TOKEN_TYPE_BEARER,
-        expires_in: parseInt(process.env.TOKEN_VALIDITY_SEC),
+        expires_in: parseInt(process.env.CLAIMS_TOKEN_VALIDITY_SEC),
         scope: scopes
     };
 }

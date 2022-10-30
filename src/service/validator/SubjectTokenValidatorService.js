@@ -1,8 +1,8 @@
 const winston = require("winston");
-const error = require("../error/ErrorMessage");
+const error = require("../../error/ErrorMessage");
 const {decode, verify} = require("jsonwebtoken");
 const axios = require("axios");
-const jwksProviderService = require('./JwksProviderService');
+const jwksProviderService = require('../jwk/JwksProviderService');
 
 const LOG_ERROR_PARSING_SUBJECT_TOKEN = 'Unable to parse subject token: %s';
 const LOG_ERROR_VALIDATING_SUBJECT_TOKEN = 'Unable to validate subject token: %s';

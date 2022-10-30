@@ -1,5 +1,5 @@
-const error = require('../error/ErrorMessage')
-const repository = require('../repository/MemoryAuthzRepository')
+const error = require('../../error/ErrorMessage')
+const repository = require('../../repository/MemoryAuthzRepository')
 const winston = require('winston')
 
 const LOG_APP_CLIENT_NOT_FOUND = 'AppClient not found by clientId: %s';

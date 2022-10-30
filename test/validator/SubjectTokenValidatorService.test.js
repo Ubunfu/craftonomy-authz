@@ -1,7 +1,7 @@
-const validatorService = require('../src/service/SubjectTokenValidatorService');
-const error = require('../src/error/ErrorMessage');
+const validatorService = require('../../src/service/validator/SubjectTokenValidatorService');
+const error = require('../../src/error/ErrorMessage');
 const axios = require('axios');
-const jwksProviderService = require('../src/service/JwksProviderService')
+const jwksProviderService = require('../../src/service/jwk/JwksProviderService')
 const jsonwebtoken = require('jsonwebtoken');
 const winston = require('winston')
 
@@ -50,7 +50,7 @@ const VALIDATED_SUBJECT_TOKEN_INFO = {
 
 jest.mock('axios');
 jest.mock('winston')
-jest.mock('../src/service/JwksProviderService');
+jest.mock('../../src/service/jwk/JwksProviderService');
 jest.mock('jsonwebtoken');
 
 beforeEach(() => jest.resetAllMocks())

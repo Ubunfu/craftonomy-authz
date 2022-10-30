@@ -1,13 +1,13 @@
-const exchangeService = require('../src/service/TokenExchangeService')
-const error = require('../src/error/ErrorMessage')
-const {getValidatedSubjectTokenInfo} = require('../src/service/SubjectTokenValidatorService');
-const {buildAccessToken} = require('../src/service/TokenBuilderService')
-const dbService = require('../src/service/DatabaseService');
+const exchangeService = require('../../src/service/token/TokenExchangeService')
+const error = require('../../src/error/ErrorMessage')
+const {getValidatedSubjectTokenInfo} = require('../../src/service/validator/SubjectTokenValidatorService');
+const {buildAccessToken} = require('../../src/service/token/TokenBuilderService')
+const dbService = require('../../src/service/db/DatabaseService');
 
 
-jest.mock('../src/service/SubjectTokenValidatorService')
-jest.mock('../src/service/TokenBuilderService')
-jest.mock('../src/service/DatabaseService')
+jest.mock('../../src/service/validator/SubjectTokenValidatorService')
+jest.mock('../../src/service/token/TokenBuilderService')
+jest.mock('../../src/service/db/DatabaseService')
 jest.mock('winston')
 
 const TEST_CLIENT = 'TEST_CLIENT';
@@ -49,7 +49,7 @@ beforeEach(() => {
     dbService.findAppIdp.mockResolvedValueOnce(TEST_APP_IDP);
     dbService.findUserScopesByEmail.mockResolvedValueOnce(TEST_USER_SCOPES);
     buildAccessToken.mockResolvedValueOnce(TEST_ACCESS_TOKEN);
-    process.env.TOKEN_VALIDITY_SEC = 1800;
+    process.env.CLAIMS_TOKEN_VALIDITY_SEC = 1800;
 });
 
 test('Given unknown client When exchangeToken Expect Error invalid_client', async () => {
