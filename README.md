@@ -37,3 +37,13 @@ connection to it.
 
 When the app starts up, it will attempt to create the tables it needs if they don't exist.  After the schema is created,
 there is some sample mock data load in `/test/resources/test-dataload.sql`.
+
+## Data Model
+Everything starts with the "App".  That represents an application that is allowed to use the authorization server. An 
+App has 1 or more "Client".  A Client represents a specific ID (and optionally a secret, which is analagous to a 
+password) that an App is using to request authorization. Each App is mapped to at least 1 "Grant" (aka OAuth 2.0 
+grant-type) which the authorization server allows it to use to request authorization.  Each App is also mapped to at 
+least 1 IDP (aka identity provider) which the authorization server allows it to use as a provider of proof of 
+successful authentication.  Users (identified by their email addresses) may be assigned 1 or more "Scope" in 
+the authorization server.  The level of access granted in a token is determined by the Scopes assigned to the user
+who is receiving authorization.
