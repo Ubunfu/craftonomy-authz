@@ -1,6 +1,6 @@
-const validatorService = require('../../src/service/validator/OAuthRequestValidatorService')
-const errors = require('../../src/error/ErrorMessage')
-const {getClone} = require("../util/TestUtil");
+const validatorService = require('../../../src/service/validator/OAuthRequestValidatorService')
+const errors = require('../../../src/error/ErrorMessage')
+const {getClone} = require("../../util/TestUtil");
 
 jest.mock('winston');
 

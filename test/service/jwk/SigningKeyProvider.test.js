@@ -1,11 +1,11 @@
-const signingKeyProvider = require('../../src/service/jwk/SigningKeyProvider');
+const signingKeyProvider = require('../../../src/service/jwk/SigningKeyProvider');
 const winston = require('winston');
-const flatFileProvider = require('../../src/service/jwk/FlatFileProvider');
+const flatFileProvider = require('../../../src/service/jwk/FlatFileProvider');
 const fs = require("fs");
 var forge = require('node-forge');
 
 jest.mock('winston');
-jest.mock('../../src/service/jwk/FlatFileProvider');
+jest.mock('../../../src/service/jwk/FlatFileProvider');
 
 const TEST_KEYSTORE = './test/resources/signing-test.p12';
 const TEST_KEYSTORE_EMPTY = './test/resources/signing-test-empty.p12';

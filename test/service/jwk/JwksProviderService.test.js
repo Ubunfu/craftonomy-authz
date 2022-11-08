@@ -1,7 +1,7 @@
 const winston = require('winston');
 const jwksClient = require('jwks-rsa');
-const jwksProviderService = require('../../src/service/jwk/JwksProviderService');
-const error = require('../../src/error/ErrorMessage');
+const jwksProviderService = require('../../../src/service/jwk/JwksProviderService');
+const error = require('../../../src/error/ErrorMessage');
 
 jest.mock('jwks-rsa');
 jest.mock('winston');

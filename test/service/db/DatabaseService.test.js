@@ -1,8 +1,8 @@
-const repository = require('../../src/repository/MemoryAuthzRepository');
+const repository = require('../../../src/repository/MemoryAuthzRepository');
 const winston = require('winston');
-const dbService = require('../../src/service/db/DatabaseService');
+const dbService = require('../../../src/service/db/DatabaseService');
 
-jest.mock('../../src/repository/MemoryAuthzRepository');
+jest.mock('../../../src/repository/MemoryAuthzRepository');
 jest.mock('winston');
 
 // Test field-level data

@@ -1,5 +1,5 @@
-const {handle} = require('../../src/error/ErrorHandler');
-const errors = require('../../src/error/ErrorMessage');
+const {handle} = require('../../../src/error/ErrorHandler');
+const errors = require('../../../src/error/ErrorMessage');
 
 function setupMocks() {
     const resMock = {
