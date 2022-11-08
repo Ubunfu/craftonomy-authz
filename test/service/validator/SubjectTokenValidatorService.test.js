@@ -57,7 +57,7 @@ test('Given error getting OIDC config info When getValidatedSubjectTokenInfo Exp
 
 test('Given error getting signing key When getValidatedSubjectTokenInfo Expect Error invalid_grant', async () => {
     axios.get.mockResolvedValueOnce(TEST_OIDC_CONFIG_RESP);
-    jwksProviderService.getSigningKey.mockImplementationOnce(jest.fn().mockRejectedValueOnce());
+    jwksProviderService.getSigningKey.mockImplementationOnce(jest.fn().mockRejectedValueOnce(new Error()));
     await expect(() => validatorService.getValidatedSubjectTokenInfo(TEST_SUBJECT_TOKEN))
         .rejects.toThrow(error.ERROR_VALIDATING_SUBJECT_TOKEN);
 });

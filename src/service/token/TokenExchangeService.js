@@ -8,7 +8,6 @@ const LOG_INVALID_CLIENT = 'Invalid client ID: %s';
 const LOG_UNAUTHORIZED_GRANT = 'Grant type %s not authorized for app: %s';
 const LOG_UNKNOWN_ISSUER = 'IDP not found by issuer: %s';
 const LOG_UNAUTHORIZED_IDP = 'IDP: %s not authorized for app: %s';
-const LOG_NO_USER_SCOPES = 'No scopes found for user identified by email: %s';
 
 const TOKEN_TYPE_JWT = 'urn:ietf:params:oauth:token-type:jwt';
 const TOKEN_TYPE_BEARER = 'bearer';
@@ -55,13 +54,7 @@ async function validateAppAuthorizedForIdp(appId, issuerUrl) {
 }
 
 async function findUserScopesByEmail(email) {
-    let userScopes;
-    try {
-        userScopes = await db.findUserScopesByEmail(email);
-    } catch (e) {
-        winston.error(LOG_NO_USER_SCOPES, email);
-        throw Error(error.ERROR_NO_USER_SCOPES);
-    }
+    const userScopes = await db.findUserScopesByEmail(email);
     return userScopes
         .map((userScope) => userScope.scope)
         .join(" ");

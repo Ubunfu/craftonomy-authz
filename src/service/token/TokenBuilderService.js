@@ -30,8 +30,8 @@ async function buildTokenPayload(clientId, email, subject, username, scopes) {
 
 async function buildAccessToken(clientId, email, subject, username, scopes) {
     const tokenPayload = await buildTokenPayload(clientId, email, subject, username, scopes);
-    const signingKey = await keyProvider.getSigningKey();
-    return sign(tokenPayload, signingKey.data, { keyid: signingKey.id });
+    const signingKey = keyProvider.getSigningKey();
+    return sign(tokenPayload, signingKey.data, { keyid: signingKey.id, algorithm: "RS256" });
 }
 
 module.exports = {
