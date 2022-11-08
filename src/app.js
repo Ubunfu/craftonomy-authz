@@ -2,9 +2,10 @@ require('dotenv').config()
 const express = require('express');
 const logger = require('morgan');
 const routerV1 = require('./routes/OAuthV1Api');
-const { sequelize } = require('./repository/MemoryAuthzRepository')
+const { sequelize } = require('./db/AuthzRepository')
 const winston = require('winston')
 winston.configure({
+    level: process.env.LOG_LEVEL || 'info',
     format: winston.format.combine(
         winston.format.timestamp(),
         winston.format.splat(),
