@@ -1,6 +1,6 @@
 const winston = require("winston");
 const error = require("../../error/ErrorMessage");
-const {decode, verify} = require("jsonwebtoken");
+const jsonwebtoken = require("jsonwebtoken");
 const axios = require("axios");
 const jwksProviderService = require('../jwk/JwksProviderService');
 
@@ -25,7 +25,7 @@ async function getOidcConfig(issuer) {
 
 async function getSubjectTokenInfo(subjectToken) {
     try {
-        const token = await decode(subjectToken, { complete: true, json: true });
+        const token = await jsonwebtoken.decode(subjectToken, { complete: true, json: true });
         return {
             email: token.payload.email,
             username: token.payload['cognito:username'],
@@ -45,7 +45,7 @@ async function validateSignature(subjectToken, subjectTokenInfo, oidcConfig) {
     const signingKey = await jwksProviderService.getSigningKey(oidcConfig.jwks_uri, subjectTokenInfo.keyId);
     try {
         winston.debug('Verifying signature using key: %s and token: %s', subjectTokenInfo.keyId, signingKey);
-        verify(subjectToken, signingKey, { algorithms: ['RS256'] });
+        await jsonwebtoken.verify(subjectToken, signingKey, { algorithms: ['RS256'] });
     } catch (e) {
         winston.error(LOG_ERROR_SIG_INVALD, subjectToken, signingKey, e.message);
         throw Error(error.ERROR_VALIDATING_SUBJECT_TOKEN);
