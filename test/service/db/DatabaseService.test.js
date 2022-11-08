@@ -65,13 +65,13 @@ describe('findIdpByIssuerUrl', () => {
 
 describe('findAppIdp', () => {
     test('Given repository returns empty When findAppIdp Expect Error', async () => {
-        repository.AppIdp.findByPk.mockResolvedValueOnce(null);
+        repository.AppIdp.findOne.mockResolvedValueOnce(null);
         await expect(() => dbService.findAppIdp(TEST_APP_ID, TEST_IDP_ID))
             .rejects
             .toThrow('');
     });
     test('Given repository returns an AppIdp When findAppIdp Expect AppIdp returned', async () => {
-        repository.AppIdp.findByPk.mockResolvedValueOnce(TEST_ENTITY);
+        repository.AppIdp.findOne.mockResolvedValueOnce(TEST_ENTITY);
         await expect(dbService.findAppIdp(TEST_APP_ID, TEST_IDP_ID))
             .resolves
             .toEqual(TEST_ENTITY);

@@ -39,7 +39,9 @@ async function findIdpByIssuerUrl(issuerUrl) {
 }
 
 async function findAppIdp(appId, idpId) {
-    const appIdp = await repository.AppIdp.findByPk(appId, idpId);
+    const appIdp = await repository.AppIdp.findOne({ where: {
+        appId, idpId
+    }});
     if (!appIdp) {
         winston.error(LOG_APP_IDP_NOT_FOUND, appId, idpId);
         throw Error();
@@ -49,7 +51,7 @@ async function findAppIdp(appId, idpId) {
 
 async function findUserScopesByEmail(email) {
     const userScopes = await repository.UserScope.findAll({where: {email: email}});
-    if (!userScopes) {
+    if (!userScopes || userScopes.length < 1) {
         winston.error(LOG_USER_SCOPES_NOT_FOUND, email);
         throw Error(error.ERROR_NO_USER_SCOPES);
     }
