@@ -49,14 +49,14 @@ test('Given cannot read keystore as PKCS12 When getSigningKey Expect Error error
     pkcs12FromAsn1Mock.mockRestore();
 });
 
-test('Given no signing keys available When getSigningKey Expect Error no signing keys', async () => {
+test('Given no signing keys available When getSigningKey Expect Error no signing-capable keys found in keystore', async () => {
     // no signing keys
     flatFileProvider.readFile.mockImplementation(
         jest.fn(() => fs.readFileSync(TEST_KEYSTORE_EMPTY, 'binary'))
     );
     await expect(() => signingKeyProvider.getSigningKey())
         .rejects
-        .toThrow('no signing keys');
+        .toThrow('no signing-capable keys found in keystore');
 });
 
 test('Given signing keys available When getSigningKey Expect returns a key', async () => {

@@ -28,20 +28,17 @@ function getPemKeyData(keyBag) {
     return forge.pki.privateKeyToPem(keyBag.key);
 }
 
-function getTimeBasedSelector(size) {
+function getTimeBasedSigningKeySelector(numAvailSigningKeys) {
     const currentEpoch = Math.floor(new Date() / 1000);
-    return currentEpoch % size;
+    return currentEpoch % numAvailSigningKeys;
 }
 
 function getArbitrarySigningKeyBag(keyBags) {
     const availableSigningKeyBags = keyBags[forge.pki.oids.pkcs8ShroudedKeyBag];
     if (availableSigningKeyBags.length < 1) {
-        throw Error('no signing keys');
+        throw Error('no signing-capable keys found in keystore');
     }
-    if (availableSigningKeyBags.length === 1) {
-        return availableSigningKeyBags[0];
-    }
-    return availableSigningKeyBags[getTimeBasedSelector(availableSigningKeyBags.size)];
+    return availableSigningKeyBags[getTimeBasedSigningKeySelector(availableSigningKeyBags.length)];
 }
 
 /**
@@ -56,11 +53,11 @@ function getArbitrarySigningKeyBag(keyBags) {
 async function getSigningKey() {
     const keystoreFile = await fetchRemoteFile(process.env.SIGNING_KEYSTORE_FILE);
     const keystore = parseFileAsKeystore(keystoreFile);
-    const keyBags = keystore.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag });
-    const keyBag = getArbitrarySigningKeyBag(keyBags);
-    const keyDataAsPem = getPemKeyData(keyBag);
+    const signingKeyBags = keystore.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag });
+    const chosenSigningKeyBag = getArbitrarySigningKeyBag(signingKeyBags);
+    const keyDataAsPem = getPemKeyData(chosenSigningKeyBag);
     return {
-        id: keyBag.attributes.friendlyName[0],
+        id: chosenSigningKeyBag.attributes.friendlyName[0],
         data: keyDataAsPem
     };
 }
