@@ -23,6 +23,7 @@ async function findAppGrant(appId, grantType) {
         winston.error(LOG_APP_GRANT_NOT_FOUND, grantType, appId);
         throw Error();
     }
+    return appGrant;
 }
 
 async function findIdpByIssuerUrl(issuerUrl) {
