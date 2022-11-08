@@ -4,3 +4,4 @@ coverage
 *.pem
 *.der
 *.cer
+*.p12
