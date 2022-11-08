@@ -91,6 +91,16 @@ test('Given ERROR_GETTING_SIGNING_KEY When handle Expect 400: invalid_grant', as
     expect(spies.sendSpy).toHaveBeenCalledWith({error: 'invalid_grant'});
 });
 
+test('Given ERROR_VALIDATING_SUBJECT_TOKEN When handle Expect 400: invalid_grant', async () => {
+    const err = {
+        message: errors.ERROR_VALIDATING_SUBJECT_TOKEN
+    }
+    const spies = setupMocks();
+    handle(err, spies.resMock);
+    expect(spies.statusSpy).toHaveBeenCalledWith(400);
+    expect(spies.sendSpy).toHaveBeenCalledWith({error: 'invalid_grant'});
+});
+
 test('Given ERROR_UNAUTHORIZED_GRANT_TYPE When handle Expect 400: unauthorized_client', async () => {
     const err = {
         message: errors.ERROR_UNAUTHORIZED_GRANT_TYPE
@@ -111,6 +121,15 @@ test('Given ERROR_NO_USER_SCOPES When handle Expect 400: invalid_scope', async (
     expect(spies.sendSpy).toHaveBeenCalledWith({error: 'invalid_scope'});
 });
 
+test('Given ERROR_UNSUPPORTED_GRANT_TYPE When handle Expect 400: unsupported_grant_type', async () => {
+   const err = {
+       message: errors.ERROR_UNSUPPORTED_GRANT_TYPE
+   }
+    const spies = setupMocks();
+    handle(err, spies.resMock);
+    expect(spies.statusSpy).toHaveBeenCalledWith(400);
+    expect(spies.sendSpy).toHaveBeenCalledWith({error: 'unsupported_grant_type'});
+});
 
 test('Given ERROR_UNKNOWN_IDP When handle Expect 400: invalid_target', async () => {
     const err = {
@@ -120,4 +139,14 @@ test('Given ERROR_UNKNOWN_IDP When handle Expect 400: invalid_target', async () 
     handle(err, spies.resMock);
     expect(spies.statusSpy).toHaveBeenCalledWith(400);
     expect(spies.sendSpy).toHaveBeenCalledWith({error: 'invalid_target'});
+});
+
+test('Given ERROR_UNHANDLED When handle Expect 500: internal_server_error', async () => {
+    const err = {
+        message: 'unhandled'
+    }
+    const spies = setupMocks();
+    handle(err, spies.resMock);
+    expect(spies.statusSpy).toHaveBeenCalledWith(500);
+    expect(spies.sendSpy).toHaveBeenCalledWith({error: 'internal_server_error'});
 });

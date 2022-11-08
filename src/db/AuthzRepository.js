@@ -1,6 +1,10 @@
 const { Sequelize, Model, DataTypes } = require('sequelize')
 
-const sequelize = new Sequelize('sqlite::memory', {
+function getDbConnString() {
+    return process.env.DB_CONN_STRING || 'sqlite::memory';
+}
+
+const sequelize = new Sequelize(getDbConnString(), {
     logging: false
 });
 
@@ -120,7 +124,7 @@ UserScope.init({
         field: 'email',
         type: DataTypes.STRING,
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
     },
     scope: {
         field: 'scope',
@@ -136,10 +140,6 @@ UserIdp.init({
         type: DataTypes.STRING,
         primaryKey: true,
         allowNull: false,
-        references: {
-            model: UserScope,
-            key: 'email'
-        }
     },
     idpId: {
         field: 'idp_id',

@@ -1,13 +1,13 @@
-const exchangeService = require('../../src/service/token/TokenExchangeService')
-const error = require('../../src/error/ErrorMessage')
-const {getValidatedSubjectTokenInfo} = require('../../src/service/validator/SubjectTokenValidatorService');
-const {buildAccessToken} = require('../../src/service/token/TokenBuilderService')
-const dbService = require('../../src/service/db/DatabaseService');
+const exchangeService = require('../../../src/service/token/TokenExchangeService')
+const error = require('../../../src/error/ErrorMessage')
+const {getValidatedSubjectTokenInfo} = require('../../../src/service/validator/SubjectTokenValidatorService');
+const {buildAccessToken} = require('../../../src/service/token/TokenBuilderService')
+const dbService = require('../../../src/service/db/DatabaseService');
 
 
-jest.mock('../../src/service/validator/SubjectTokenValidatorService')
-jest.mock('../../src/service/token/TokenBuilderService')
-jest.mock('../../src/service/db/DatabaseService')
+jest.mock('../../../src/service/validator/SubjectTokenValidatorService')
+jest.mock('../../../src/service/token/TokenBuilderService')
+jest.mock('../../../src/service/db/DatabaseService')
 jest.mock('winston')
 
 const TEST_CLIENT = 'TEST_CLIENT';

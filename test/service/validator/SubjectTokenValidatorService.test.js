@@ -1,7 +1,7 @@
-const validatorService = require('../../src/service/validator/SubjectTokenValidatorService');
-const error = require('../../src/error/ErrorMessage');
+const validatorService = require('../../../src/service/validator/SubjectTokenValidatorService');
+const error = require('../../../src/error/ErrorMessage');
 const axios = require('axios');
-const jwksProviderService = require('../../src/service/jwk/JwksProviderService')
+const jwksProviderService = require('../../../src/service/jwk/JwksProviderService')
 const jsonwebtoken = require('jsonwebtoken');
 const winston = require('winston')
 
@@ -9,8 +9,8 @@ const TEST_SUBJECT_TOKEN = 'eyJraWQiOiJwaEVoOW9uZFg4dDFDcVZBU0I1R3RXTUtHYWJtdXdV
 const TEST_SUBJECT_TOKEN_INVALID = 'sdf';
 const TEST_SUBJECT_TOKEN_SUB = '85e2a700-fb8e-47bb-970f-a3bcc5275962';
 const TEST_SIGNING_KEY = 'testSigningKey';
-const TEST_EMAIL = 'user@mail.com';
-const TEST_USERNAME = 'userA';
+const TEST_EMAIL = 'user@gmail.com';
+const TEST_USERNAME = 'ryan';
 const TEST_OIDC_CONFIG_RESP = {
     data: {
         issuer: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_u9hvQAw2m",
@@ -29,17 +29,6 @@ const TEST_JWKS_RESP = {
         }]
     }
 }
-const TEST_SUBJECT_TOKEN_DECODED = {
-    header: {
-        kid: "phEh9ondX8t1CqVASB5GtWMKGabmuwUPxfmMGJo8NdA="
-    },
-    payload: {
-        iss: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_u9hvQAw2m",
-        sub: "85e2a700-fb8e-47bb-970f-a3bcc5275962",
-        email: TEST_EMAIL,
-        'cognito:username': TEST_USERNAME
-    }
-}
 const VALIDATED_SUBJECT_TOKEN_INFO = {
     email: TEST_EMAIL,
     username: TEST_USERNAME,
@@ -50,8 +39,7 @@ const VALIDATED_SUBJECT_TOKEN_INFO = {
 
 jest.mock('axios');
 jest.mock('winston')
-jest.mock('../../src/service/jwk/JwksProviderService');
-jest.mock('jsonwebtoken');
+jest.mock('../../../src/service/jwk/JwksProviderService');
 
 beforeEach(() => jest.resetAllMocks())
 
@@ -69,7 +57,7 @@ test('Given error getting OIDC config info When getValidatedSubjectTokenInfo Exp
 
 test('Given error getting signing key When getValidatedSubjectTokenInfo Expect Error invalid_grant', async () => {
     axios.get.mockResolvedValueOnce(TEST_OIDC_CONFIG_RESP);
-    jwksProviderService.getSigningKey.mockImplementationOnce(jest.fn().mockRejectedValueOnce());
+    jwksProviderService.getSigningKey.mockImplementationOnce(jest.fn().mockRejectedValueOnce(new Error()));
     await expect(() => validatorService.getValidatedSubjectTokenInfo(TEST_SUBJECT_TOKEN))
         .rejects.toThrow(error.ERROR_VALIDATING_SUBJECT_TOKEN);
 });
@@ -77,15 +65,14 @@ test('Given error getting signing key When getValidatedSubjectTokenInfo Expect E
 test('Given subject token signature invalid When getValidatedSubjectTokenInfo Expect error invalid_grant', async () => {
     axios.get.mockResolvedValueOnce(TEST_OIDC_CONFIG_RESP);
     jwksProviderService.getSigningKey.mockResolvedValueOnce(TEST_SIGNING_KEY);
-    jsonwebtoken.verify.mockImplementationOnce(jest.fn().mockRejectedValueOnce(new Error()));
+    jsonwebtoken.verify = jest.fn().mockRejectedValueOnce(new Error());
     await expect(() => validatorService.getValidatedSubjectTokenInfo(TEST_SUBJECT_TOKEN))
         .rejects.toThrow(error.ERROR_VALIDATING_SUBJECT_TOKEN);
 });
 
 test('Given valid subject token When getValidatedSubjectTokenInfo Expect returns info', async () => {
     axios.get.mockResolvedValueOnce(TEST_OIDC_CONFIG_RESP);
-    jsonwebtoken.decode.mockResolvedValueOnce(TEST_SUBJECT_TOKEN_DECODED);
-    jsonwebtoken.verify.mockResolvedValueOnce(null);
+    jsonwebtoken.verify = jest.fn().mockResolvedValue(null);
     jwksProviderService.getSigningKey.mockResolvedValueOnce(TEST_SIGNING_KEY);
     await expect(validatorService.getValidatedSubjectTokenInfo(TEST_SUBJECT_TOKEN))
         .resolves.toEqual(VALIDATED_SUBJECT_TOKEN_INFO);

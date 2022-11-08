@@ -1,5 +1,5 @@
 const error = require('../../error/ErrorMessage')
-const repository = require('../../repository/MemoryAuthzRepository')
+const repository = require('../../db/AuthzRepository')
 const winston = require('winston')
 
 const LOG_APP_CLIENT_NOT_FOUND = 'AppClient not found by clientId: %s';
@@ -18,11 +18,15 @@ async function findAppClient(clientId) {
 }
 
 async function findAppGrant(appId, grantType) {
-    let appGrant = await repository.AppGrant.findByPk(appId, grantType);
+    let appGrant = await repository.AppGrant.findOne({
+        where: {
+            appId, grantType
+        }});
     if (!appGrant) {
         winston.error(LOG_APP_GRANT_NOT_FOUND, grantType, appId);
         throw Error();
     }
+    return appGrant;
 }
 
 async function findIdpByIssuerUrl(issuerUrl) {
@@ -35,7 +39,9 @@ async function findIdpByIssuerUrl(issuerUrl) {
 }
 
 async function findAppIdp(appId, idpId) {
-    const appIdp = await repository.AppIdp.findByPk(appId, idpId);
+    const appIdp = await repository.AppIdp.findOne({ where: {
+        appId, idpId
+    }});
     if (!appIdp) {
         winston.error(LOG_APP_IDP_NOT_FOUND, appId, idpId);
         throw Error();
@@ -45,7 +51,7 @@ async function findAppIdp(appId, idpId) {
 
 async function findUserScopesByEmail(email) {
     const userScopes = await repository.UserScope.findAll({where: {email: email}});
-    if (!userScopes) {
+    if (!userScopes || userScopes.length < 1) {
         winston.error(LOG_USER_SCOPES_NOT_FOUND, email);
         throw Error(error.ERROR_NO_USER_SCOPES);
     }

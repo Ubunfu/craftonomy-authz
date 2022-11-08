@@ -1,5 +1,5 @@
-const tokenBuilderService = require('../../src/service/token/TokenBuilderService');
-const keyProvider = require("../../src/service/jwk/SigningKeyProvider");
+const tokenBuilderService = require('../../../src/service/token/TokenBuilderService');
+const keyProvider = require("../../../src/service/jwk/SigningKeyProvider");
 const winston = require('winston')
 const fs = require("fs");
 const jsonwebtoken = require('jsonwebtoken');
@@ -13,7 +13,7 @@ const TEST_ISSUER = 'https://token.issuer.com';
 const TEST_AUDIENCE = 'https://token.audience.com';
 
 jest.mock('winston')
-jest.mock("../../src/service/jwk/SigningKeyProvider");
+jest.mock("../../../src/service/jwk/SigningKeyProvider");
 
 beforeEach(() => {
     process.env.CLAIMS_TOKEN_VALIDITY_SEC = 1800;
