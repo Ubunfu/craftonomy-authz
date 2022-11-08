@@ -1,5 +1,5 @@
-const {handle} = require('../../../src/error/ErrorHandler');
-const errors = require('../../../src/error/ErrorMessage');
+const {handle} = require('../../src/error/ErrorHandler');
+const errors = require('../../src/error/ErrorMessage');
 
 function setupMocks() {
     const resMock = {
@@ -111,6 +111,15 @@ test('Given ERROR_NO_USER_SCOPES When handle Expect 400: invalid_scope', async (
     expect(spies.sendSpy).toHaveBeenCalledWith({error: 'invalid_scope'});
 });
 
+test('Given ERROR_UNSUPPORTED_GRANT_TYPE When handle Expect 400: unsupported_grant_type', async () => {
+   const err = {
+       message: errors.ERROR_UNSUPPORTED_GRANT_TYPE
+   }
+    const spies = setupMocks();
+    handle(err, spies.resMock);
+    expect(spies.statusSpy).toHaveBeenCalledWith(400);
+    expect(spies.sendSpy).toHaveBeenCalledWith({error: 'unsupported_grant_type'});
+});
 
 test('Given ERROR_UNKNOWN_IDP When handle Expect 400: invalid_target', async () => {
     const err = {
@@ -120,4 +129,14 @@ test('Given ERROR_UNKNOWN_IDP When handle Expect 400: invalid_target', async () 
     handle(err, spies.resMock);
     expect(spies.statusSpy).toHaveBeenCalledWith(400);
     expect(spies.sendSpy).toHaveBeenCalledWith({error: 'invalid_target'});
+});
+
+test('Given ERROR_UNHANDLED When handle Expect 500: internal_server_error', async () => {
+    const err = {
+        message: 'unhandled'
+    }
+    const spies = setupMocks();
+    handle(err, spies.resMock);
+    expect(spies.statusSpy).toHaveBeenCalledWith(500);
+    expect(spies.sendSpy).toHaveBeenCalledWith({error: 'internal_server_error'});
 });
