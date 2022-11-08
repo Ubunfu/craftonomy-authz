@@ -1,8 +1,8 @@
-const repository = require('../../../src/repository/MemoryAuthzRepository');
+const repository = require('../../../src/db/AuthzRepository');
 const winston = require('winston');
 const dbService = require('../../../src/service/db/DatabaseService');
 
-jest.mock('../../../src/repository/MemoryAuthzRepository');
+jest.mock('../../../src/db/AuthzRepository');
 jest.mock('winston');
 
 // Test field-level data
@@ -35,13 +35,13 @@ describe('findAppClient', () => {
 
 describe('findAppGrant', () => {
     test('Given repository returns empty When findAppGrant Expect Error', async () => {
-        repository.AppGrant.findByPk.mockResolvedValueOnce(null);
+        repository.AppGrant.findOne.mockResolvedValueOnce(null);
         await expect(() => dbService.findAppGrant(TEST_APP_ID, TEST_GRANT_TYPE))
             .rejects
             .toThrow('');
     });
     test('Given repository returns an AppGrant When findAppGrant Expect AppGrant returned', async () => {
-        repository.AppGrant.findByPk.mockResolvedValueOnce(TEST_ENTITY);
+        repository.AppGrant.findOne.mockResolvedValueOnce(TEST_ENTITY);
         await expect(dbService.findAppGrant(TEST_APP_ID, TEST_GRANT_TYPE))
             .resolves
             .toEqual(TEST_ENTITY);

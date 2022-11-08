@@ -1,5 +1,5 @@
 const error = require('../../error/ErrorMessage')
-const repository = require('../../repository/MemoryAuthzRepository')
+const repository = require('../../db/AuthzRepository')
 const winston = require('winston')
 
 const LOG_APP_CLIENT_NOT_FOUND = 'AppClient not found by clientId: %s';
@@ -18,7 +18,10 @@ async function findAppClient(clientId) {
 }
 
 async function findAppGrant(appId, grantType) {
-    let appGrant = await repository.AppGrant.findByPk(appId, grantType);
+    let appGrant = await repository.AppGrant.findOne({
+        where: {
+            appId, grantType
+        }});
     if (!appGrant) {
         winston.error(LOG_APP_GRANT_NOT_FOUND, grantType, appId);
         throw Error();
