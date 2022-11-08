@@ -5,16 +5,15 @@ const axios = require("axios");
 const jwksProviderService = require('../jwk/JwksProviderService');
 
 const LOG_ERROR_PARSING_SUBJECT_TOKEN = 'Unable to parse subject token: %s';
-const LOG_ERROR_VALIDATING_SUBJECT_TOKEN = 'Unable to validate subject token: %s';
+const LOG_ERROR_VALIDATING_SUBJECT_TOKEN = 'Unable to validate subject token: %s - %s';
 const LOG_ERROR_READING_OIDC_CONFIG = 'Error reading OIDC config from %s: %s';
-const LOG_ERROR_SIG_INVALD = 'Signature invalid for subject token: %s and signing key: %s - %s';
 
 async function getOidcConfig(issuer) {
     const oidcConfigUrl = issuer + '/.well-known/openid-configuration';
     try {
         winston.debug('Reading OIDC config from %s', oidcConfigUrl);
         const oidcConfigResp = await axios.get(oidcConfigUrl);
-        winston.debug('Read OIDC data: %s', JSON.stringify(oidcConfigResp));
+        winston.debug('Read OIDC data: %s', JSON.stringify(oidcConfigResp.data));
         return oidcConfigResp.data;
     } catch (e) {
         winston.error(JSON.stringify(e));
@@ -40,26 +39,21 @@ async function getSubjectTokenInfo(subjectToken) {
     }
 }
 
-async function validateSignature(subjectToken, subjectTokenInfo, oidcConfig) {
+async function validateSubjectToken(subjectToken, subjectTokenInfo, oidcConfig) {
     winston.debug('Reading remote signing key %s from %s', subjectTokenInfo.keyId, oidcConfig.jwks_uri);
     const signingKey = await jwksProviderService.getSigningKey(oidcConfig.jwks_uri, subjectTokenInfo.keyId);
-    try {
-        winston.debug('Verifying signature using key: %s and token: %s', subjectTokenInfo.keyId, signingKey);
-        await jsonwebtoken.verify(subjectToken, signingKey, { algorithms: ['RS256'] });
-    } catch (e) {
-        winston.error(LOG_ERROR_SIG_INVALD, subjectToken, signingKey, e.message);
-        throw Error(error.ERROR_VALIDATING_SUBJECT_TOKEN);
-    }
+    winston.debug('Verifying token using key: %s and token: %s', subjectTokenInfo.keyId, signingKey);
+    await jsonwebtoken.verify(subjectToken, signingKey, { algorithms: ['RS256'] });
 }
 
 async function getValidatedSubjectTokenInfo(subjectToken) {
     try {
         const subjectTokenInfo = await getSubjectTokenInfo(subjectToken);
         const oidcConfig = await getOidcConfig(subjectTokenInfo.issuer);
-        await validateSignature(subjectToken, subjectTokenInfo, oidcConfig);
+        await validateSubjectToken(subjectToken, subjectTokenInfo, oidcConfig);
         return subjectTokenInfo;
     } catch (e) {
-        winston.error(LOG_ERROR_VALIDATING_SUBJECT_TOKEN, subjectToken);
+        winston.error(LOG_ERROR_VALIDATING_SUBJECT_TOKEN, subjectToken, e.message);
         throw Error(error.ERROR_VALIDATING_SUBJECT_TOKEN);
     }
 }

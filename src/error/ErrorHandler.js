@@ -19,7 +19,8 @@ function is400InvalidClient(message) {
 
 function is400InvalidGrant(message) {
     return [
-        errors.ERROR_GETTING_SIGNING_KEY
+        errors.ERROR_GETTING_SIGNING_KEY,
+        errors.ERROR_VALIDATING_SUBJECT_TOKEN
     ].indexOf(message) >= 0;
 }
 

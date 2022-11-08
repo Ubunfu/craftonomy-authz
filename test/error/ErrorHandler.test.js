@@ -91,6 +91,16 @@ test('Given ERROR_GETTING_SIGNING_KEY When handle Expect 400: invalid_grant', as
     expect(spies.sendSpy).toHaveBeenCalledWith({error: 'invalid_grant'});
 });
 
+test('Given ERROR_VALIDATING_SUBJECT_TOKEN When handle Expect 400: invalid_grant', async () => {
+    const err = {
+        message: errors.ERROR_VALIDATING_SUBJECT_TOKEN
+    }
+    const spies = setupMocks();
+    handle(err, spies.resMock);
+    expect(spies.statusSpy).toHaveBeenCalledWith(400);
+    expect(spies.sendSpy).toHaveBeenCalledWith({error: 'invalid_grant'});
+});
+
 test('Given ERROR_UNAUTHORIZED_GRANT_TYPE When handle Expect 400: unauthorized_client', async () => {
     const err = {
         message: errors.ERROR_UNAUTHORIZED_GRANT_TYPE
