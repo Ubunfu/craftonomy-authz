@@ -20,10 +20,10 @@ beforeEach(() => {
     process.env.CLAIMS_ISS = TEST_ISSUER;
     process.env.CLAIMS_AUD = TEST_AUDIENCE;
     keyProvider.getSigningKey.mockImplementation(
-        jest.fn(async () =>  {
+        jest.fn(() =>  {
             return {
                 id: '1',
-                data: await fs.readFileSync('signingKey.pem')
+                data: fs.readFileSync('signingKey.pem')
             }
         }));
 });
@@ -41,15 +41,11 @@ test('Given any parameters missing When buildAccessToken Expect Error missing in
     await expect(() => tokenBuilderService.buildAccessToken(
         TEST_CLIENT, TEST_EMAIL, TEST_SUBJECT, null, TEST_SCOPES))
         .rejects.toThrow('missing input');
-    await expect(() => tokenBuilderService.buildAccessToken(
-        TEST_CLIENT, TEST_EMAIL, TEST_SUBJECT, TEST_USER, null))
-        .rejects.toThrow('missing input');
 });
 
 test('Given signing key not available When buildAccessToken Expect Error re-thrown', async () => {
     keyProvider.getSigningKey.mockReset();
-    keyProvider.getSigningKey.mockImplementation(
-        jest.fn().mockRejectedValue(new Error('keyProviderError')));
+    keyProvider.getSigningKey.mockImplementation(() => {throw Error('keyProviderError')});
     await expect(() => tokenBuilderService.buildAccessToken(
         TEST_CLIENT, TEST_EMAIL, TEST_SUBJECT, TEST_USER, TEST_SCOPES))
         .rejects.toThrow('keyProviderError');

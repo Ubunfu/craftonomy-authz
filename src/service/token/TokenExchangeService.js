@@ -53,9 +53,23 @@ async function validateAppAuthorizedForIdp(appId, issuerUrl) {
     await findAppIdpByPk(appId, idp.idpId);
 }
 
+async function registerDefaultUserScopes(email) {
+    const defaultUserScopes = process.env.DEFAULT_SCOPES.split(',');
+    for (const scope of defaultUserScopes) {
+        await db.saveUserScope(email, scope);
+    }
+    return defaultUserScopes;
+}
+
 async function findUserScopesByEmail(email) {
-    const userScopes = await db.findUserScopesByEmail(email);
+    let userScopes = await db.findUserScopesByEmail(email);
+    if (userScopes.length === 0) {
+        // user must not be registered
+        userScopes = await registerDefaultUserScopes(email);
+        return userScopes.join(" ");
+    }
     return userScopes
+        // map each object to it's 'scope' field
         .map((userScope) => userScope.scope)
         .join(" ");
 }

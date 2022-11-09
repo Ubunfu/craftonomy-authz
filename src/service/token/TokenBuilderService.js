@@ -8,7 +8,7 @@ async function getEpochSecsFromNow(seconds) {
 }
 
 async function buildTokenPayload(clientId, email, subject, username, scopes) {
-    if (!clientId || !email || !subject || !username || !scopes) {
+    if (!clientId || !email || !subject || !username) {
         winston.error('Missing data trying to build token');
         throw Error('missing input');
     }
@@ -24,7 +24,7 @@ async function buildTokenPayload(clientId, email, subject, username, scopes) {
         jti: uuid.v4(),
         email: email,
         username: username,
-        scope: scopes
+        scope: (scopes || "")
     };
 }
 

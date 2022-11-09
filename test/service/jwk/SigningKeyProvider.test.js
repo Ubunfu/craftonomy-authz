@@ -21,11 +21,10 @@ beforeEach(() => {
 
 test('Given keysore file unreadable When getSigningKey Expect Error error reading from filesystem', async () => {
     flatFileProvider.readFile.mockReset();
-    flatFileProvider.readFile.mockImplementation(
-        jest.fn().mockRejectedValue(new Error('some random i/o error'))
-    );
-    await expect(() => signingKeyProvider.getSigningKey())
-        .rejects
+    flatFileProvider.readFile.mockImplementation(() => {
+        throw Error('some random i/o error')
+    });
+    expect(() => signingKeyProvider.getSigningKey())
         .toThrow('error reading from filesystem');
 });
 
@@ -33,8 +32,7 @@ test('Given cannot open keystore When getSigningKey Expect Error error reading k
     const fromDerMock = jest.spyOn(forge.asn1, 'fromDer').mockImplementation(() => {
         throw Error('some node-forge error');
     });
-    await expect(() => signingKeyProvider.getSigningKey())
-        .rejects
+    expect(() => signingKeyProvider.getSigningKey())
         .toThrow('error reading keystore');
     fromDerMock.mockRestore();
 });
@@ -43,8 +41,7 @@ test('Given cannot read keystore as PKCS12 When getSigningKey Expect Error error
     const pkcs12FromAsn1Mock = jest.spyOn(forge.pkcs12, 'pkcs12FromAsn1').mockImplementation(() => {
         throw Error('some node-forge error');
     });
-    await expect(() => signingKeyProvider.getSigningKey())
-        .rejects
+    expect(() => signingKeyProvider.getSigningKey())
         .toThrow('error reading keystore');
     pkcs12FromAsn1Mock.mockRestore();
 });
@@ -54,13 +51,12 @@ test('Given no signing keys available When getSigningKey Expect Error no signing
     flatFileProvider.readFile.mockImplementation(
         jest.fn(() => fs.readFileSync(TEST_KEYSTORE_EMPTY, 'binary'))
     );
-    await expect(() => signingKeyProvider.getSigningKey())
-        .rejects
+    expect(() => signingKeyProvider.getSigningKey())
         .toThrow('no signing-capable keys found in keystore');
 });
 
 test('Given signing keys available When getSigningKey Expect returns a key', async () => {
-    const signingKey = await signingKeyProvider.getSigningKey();
+    const signingKey = signingKeyProvider.getSigningKey();
     expect(signingKey.id).toEqual('test-1');
     expect(signingKey.data).toContain('BEGIN RSA PRIVATE KEY');
 });

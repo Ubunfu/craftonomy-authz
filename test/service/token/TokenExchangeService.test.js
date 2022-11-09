@@ -21,6 +21,7 @@ const TEST_SUBJECT_TOKEN = 'eyJraWQiOiJwaEVoOW9uZFg4dDFDcVZBU0I1R3RXTUtHYWJtdXdV
 const TEST_APP_CLIENT = {clientId: TEST_CLIENT, secret: TEST_SECRET, appId: TEST_APP_ID}
 const TEST_APP_GRANT = {appId: TEST_APP_ID, grantType: GRANT_TYPE_TOKEN_EXCHANGE};
 const TEST_ISSUER_URL = 'https://tokenissuer.com';
+const TEST_DEFAULT_SCOPES = 'scope.read';
 const VALIDATED_SUBJECT_TOKEN_INFO = {
     email: TEST_EMAIL,
     username: TEST_USERNAME,
@@ -39,6 +40,13 @@ const TEST_TOKEN_RESPONSE = {
     scope: "scope1 scope2",
     token_type: "bearer"
 }
+const TEST_TOKEN_RESPONSE_DEFAULT_SCOPES = {
+    access_token: TEST_ACCESS_TOKEN,
+    expires_in: 1800,
+    issued_token_type: "urn:ietf:params:oauth:token-type:jwt",
+    scope: TEST_DEFAULT_SCOPES,
+    token_type: "bearer"
+}
 
 beforeEach(() => {
     jest.resetAllMocks()
@@ -50,6 +58,7 @@ beforeEach(() => {
     dbService.findUserScopesByEmail.mockResolvedValueOnce(TEST_USER_SCOPES);
     buildAccessToken.mockResolvedValueOnce(TEST_ACCESS_TOKEN);
     process.env.CLAIMS_TOKEN_VALIDITY_SEC = 1800;
+    process.env.DEFAULT_SCOPES = TEST_DEFAULT_SCOPES;
 });
 
 test('Given unknown client When exchangeToken Expect Error invalid_client', async () => {
@@ -94,14 +103,6 @@ test('Given app not linked to IDP When exchangeToken Expect Error invalid_target
         .rejects.toThrow(error.ERROR_INVALID_APP_IDP);
 });
 
-test('Given no user scopes registered When exchangeToken Expect Error invalid_scope', async () => {
-    dbService.findUserScopesByEmail.mockReset();
-    dbService.findUserScopesByEmail.mockRejectedValue(null);
-    await expect(() => exchangeService.exchangeToken(
-        GRANT_TYPE_TOKEN_EXCHANGE, TEST_CLIENT, TEST_SUBJECT_TOKEN, SUBJECT_TOKEN_TYPE_JWT))
-        .rejects.toThrow(error.ERROR_NO_USER_SCOPES);
-});
-
 test('Given error building access token When exchangeToken Expect Error internal_server_error', async () => {
     buildAccessToken.mockReset();
     buildAccessToken.mockImplementationOnce(
@@ -111,7 +112,16 @@ test('Given error building access token When exchangeToken Expect Error internal
         .rejects.toThrow(error.ERROR_BUILDING_TOKEN);
 });
 
-test('Given valid input When exchangeToken Expect null FOR NOW', async () => {
+test('Given no user scopes registered When exchangeToken Expect default scopes added and token issued', async () => {
+    dbService.findUserScopesByEmail.mockReset();
+    dbService.findUserScopesByEmail.mockResolvedValueOnce([]);
+    await expect(exchangeService.exchangeToken(
+        GRANT_TYPE_TOKEN_EXCHANGE, TEST_CLIENT, TEST_SUBJECT_TOKEN, SUBJECT_TOKEN_TYPE_JWT))
+        .resolves
+        .toEqual(TEST_TOKEN_RESPONSE_DEFAULT_SCOPES);
+});
+
+test('Given valid input When exchangeToken Expect token issued', async () => {
     await expect(exchangeService.exchangeToken(
         GRANT_TYPE_TOKEN_EXCHANGE, TEST_CLIENT, TEST_SUBJECT_TOKEN, SUBJECT_TOKEN_TYPE_JWT))
         .resolves
