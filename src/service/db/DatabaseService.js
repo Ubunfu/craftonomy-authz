@@ -6,7 +6,6 @@ const LOG_APP_CLIENT_NOT_FOUND = 'AppClient not found by clientId: %s';
 const LOG_APP_GRANT_NOT_FOUND = 'AppGrant not found by appId: %s and grantType: %s';
 const LOG_IDP_NOT_FOUND = 'Idp not found by issuerUrl: %s';
 const LOG_APP_IDP_NOT_FOUND = 'AppIdp not found by appId: %s and idpId: %s';
-const LOG_USER_SCOPES_NOT_FOUND = 'UserScopes not found by email: %s';
 
 async function findAppClient(clientId) {
     let appClient = await repository.AppClient.findByPk(clientId);
@@ -50,12 +49,13 @@ async function findAppIdp(appId, idpId) {
 }
 
 async function findUserScopesByEmail(email) {
-    const userScopes = await repository.UserScope.findAll({where: {email: email}});
-    if (!userScopes || userScopes.length < 1) {
-        winston.error(LOG_USER_SCOPES_NOT_FOUND, email);
-        throw Error(error.ERROR_NO_USER_SCOPES);
-    }
-    return userScopes;
+    return await repository.UserScope.findAll({where: {email: email}});
+}
+
+async function saveUserScope(email, scope) {
+    await repository.UserScope.create({
+        email, scope
+    });
 }
 
 module.exports = {
@@ -64,4 +64,5 @@ module.exports = {
     findIdpByIssuerUrl,
     findAppIdp,
     findUserScopesByEmail,
+    saveUserScope,
 }

@@ -12,6 +12,7 @@ const TEST_GRANT_TYPE = 'grantType';
 const TEST_ISSUER_URL = 'issuerUrl';
 const TEST_IDP_ID = 'idpId';
 const TEST_EMAIL = 'email';
+const TEST_SCOPE = 'scope1';
 
 // Test entities
 const TEST_ENTITY = {
@@ -79,16 +80,18 @@ describe('findAppIdp', () => {
 });
 
 describe('findUserScopesByEmail', () => {
-    test('Given repository returns empty When findUserScopesByEmail Expect Error', async () => {
-        repository.UserScope.findAll.mockResolvedValueOnce(null);
-        await expect(() => dbService.findUserScopesByEmail(TEST_EMAIL))
-            .rejects
-            .toThrow('');
-    });
     test('Given repository returns UserScopes When findUserScopesByEmail Expect UserScopes returned', async () => {
         repository.UserScope.findAll.mockResolvedValueOnce(TEST_ENTITY);
         await expect(dbService.findUserScopesByEmail(TEST_EMAIL))
             .resolves
             .toEqual(TEST_ENTITY);
+    })
+});
+
+describe('saveUserScope', () => {
+    test('Given repository works OK When saveUserScope Expect resolves quietly', async () => {
+        repository.UserScope.create.mockResolvedValueOnce(null);
+        await expect(dbService.saveUserScope(TEST_EMAIL, TEST_SCOPE))
+            .resolves;
     })
 });
