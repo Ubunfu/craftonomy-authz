@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: craftonomy-authz-deployment
+  labels:
+    app: authz-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authz-app
+  template:
+    metadata:
+      labels:
+        app: authz-app
+    spec:
+      containers:
+        - name: authz-app
+          image: ghcr.io/ubunfu/craftonomy-authz:0.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: authz-app-port
+          env:
+            - name: CLAIMS_TOKEN_VALIDITY_SEC
+              valueFrom:
+                configMapKeyRef:
+                  name: authz-app-configmap
+                  key: CLAIMS_TOKEN_VALIDITY_SEC
+            - name: CLAIMS_ISS
+              valueFrom:
+                configMapKeyRef:
+                  name: authz-app-configmap
+                  key: CLAIMS_ISS
+            - name: CLAIMS_AUD
+              valueFrom:
+                configMapKeyRef:
+                  name: authz-app-configmap
+                  key: CLAIMS_AUD
+            - name: SIGNING_KEYSTORE_FILE
+              valueFrom:
+                configMapKeyRef:
+                  name: authz-app-configmap
+                  key: SIGNING_KEYSTORE_FILE
+            - name: SIGNING_KEYSTORE_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: authz-app-configmap
+                  key: SIGNING_KEYSTORE_PASSWORD
+            - name: DB_CONN_STRING
+              valueFrom:
+                configMapKeyRef:
+                  name: authz-app-configmap
+                  key: DB_CONN_STRING
+            - name: DEFAULT_SCOPES
+              valueFrom:
+                configMapKeyRef:
+                  name: authz-app-configmap
+                  key: DEFAULT_SCOPES
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: authz-app-configmap
+                  key: LOG_LEVEL
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: authz-app-configmap
+                  key: PORT

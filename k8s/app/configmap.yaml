@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authz-app-configmap
+data:
+  CLAIMS_TOKEN_VALIDITY_SEC: ''
+  CLAIMS_ISS: ''
+  CLAIMS_AUD: ''
+  SIGNING_KEYSTORE_FILE: ''
+  SIGNING_KEYSTORE_PASSWORD: ''
+  DB_CONN_STRING: ''
+  DEFAULT_SCOPES: ''
+  LOG_LEVEL: 'info'
+  PORT: '80'
