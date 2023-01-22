@@ -9,8 +9,9 @@ const GRANT_TYPE_CLIENT_CREDENTIALS = 'client_credentials';
 const TEST_CLIENT_ID = 'TEST_CLIENT';
 const TEST_SCOPE = 'scopeA scopeB';
 const TEST_SUBJECT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
-const SUBJECT_TOKEN_TYPE_JWT = 'urn:ietf:params:oauth:token-type:jwt';
+const SUBJECT_TOKEN_TYPE_JWT = 'urn:ietf:params:oauth:token-type:refresh-token';
 const SUBJECT_TOKEN_TYPE_ACCESS_TOKEN = 'urn:ietf:params:oauth:token-type:access_token';
+const TEST_ID_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
 const CONTENT_TYPE_JSON = 'application/json';
 const CONTENT_TYPE_X_WWW_FORM_URLENCODED = 'application/x-www-form-urlencoded';
 const VALID_REQUEST = {
@@ -19,7 +20,8 @@ const VALID_REQUEST = {
         client_id: TEST_CLIENT_ID,
         scope: TEST_SCOPE,
         subject_token: TEST_SUBJECT_TOKEN,
-        subject_token_type: SUBJECT_TOKEN_TYPE_JWT
+        subject_token_type: SUBJECT_TOKEN_TYPE_JWT,
+        id_token: TEST_ID_TOKEN
     }
 }
 
@@ -60,6 +62,13 @@ test('Given missing subject_token_type When validateRequest Expect Error', () =>
     req.body.subject_token_type = null;
     expect(() => validatorService.validateRequest(req))
         .toThrow(errors.ERROR_MISSING_SUBJECT_TOKEN_TYPE)
+})
+
+test('Given missing id_token When validateRequest Expect Error', async () => {
+    let req = getClone(VALID_REQUEST);
+    req.body.id_token = null;
+    expect(() => validatorService.validateRequest(req))
+        .toThrow(errors.ERROR_MISSING_ID_TOKEN)
 })
 
 test('Given grant type is not token-exchange When validateRequest Expect Error', () => {

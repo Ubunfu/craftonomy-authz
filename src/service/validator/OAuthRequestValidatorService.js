@@ -3,7 +3,7 @@ const winston = require('winston')
 
 const GRANT_TYPE_TOKEN_EXCHANGE = 'urn:ietf:params:oauth:grant-type:token-exchange';
 const CONTENT_TYPE_X_WWW_FORM_URLENCODED = 'application/x-www-form-urlencoded';
-const SUBJECT_TOKEN_TYPE_JWT = 'urn:ietf:params:oauth:token-type:jwt';
+const SUBJECT_TOKEN_TYPE_REFRESH_TOKEN = 'urn:ietf:params:oauth:token-type:refresh-token';
 
 function ensureRequiredParametersPresent(req) {
     if (!req.body.grant_type) {
@@ -22,6 +22,10 @@ function ensureRequiredParametersPresent(req) {
         winston.error(errors.ERROR_MISSING_SUBJECT_TOKEN_TYPE)
         throw Error(errors.ERROR_MISSING_SUBJECT_TOKEN_TYPE);
     }
+    if (!req.body.id_token) {
+        winston.error(errors.ERROR_MISSING_ID_TOKEN)
+        throw Error(errors.ERROR_MISSING_ID_TOKEN);
+    }
 }
 
 function ensureParametersAreValid(req) {
@@ -33,7 +37,7 @@ function ensureParametersAreValid(req) {
         winston.error('Unsupported grant-type: %s', req.body.grant_type)
         throw Error(errors.ERROR_UNSUPPORTED_GRANT_TYPE);
     }
-    if (req.body.subject_token_type !== SUBJECT_TOKEN_TYPE_JWT) {
+    if (req.body.subject_token_type !== SUBJECT_TOKEN_TYPE_REFRESH_TOKEN) {
         winston.error('Unsupported subject_token_type: %s', req.body.subject_token_type)
         throw Error(errors.ERROR_UNSUPPORTED_SUBJECT_TOKEN_TYPE);
     }

@@ -4,6 +4,7 @@ const errors = {
     ERROR_MISSING_CLIENT_ID: 'invalid_request: missing client_id',
     ERROR_MISSING_SUBJECT_TOKEN: 'invalid_request: missing subject_token',
     ERROR_MISSING_SUBJECT_TOKEN_TYPE: 'invalid_request: missing subject_token_type',
+    ERROR_MISSING_ID_TOKEN: 'invalid_request: missing id_token',
     ERROR_UNSUPPORTED_GRANT_TYPE: 'unsupported_grant_type',
     ERROR_UNSUPPORTED_SUBJECT_TOKEN_TYPE: 'invalid_request: unsupported subject_token_type',
     ERROR_INVALID_CLIENT: 'invalid_client',
