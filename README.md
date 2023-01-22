@@ -57,7 +57,7 @@ support routing to them via custom DNS names (e.g. an authorization server liste
 an API server listening to `api.craftonomy.net:443`) and also support TLS (terminated at the ingress controller).
 
 ### Preparing the K8s Server
-1. Provision a Ubuntu linux server in the cloud somewhere. Make sure port 22 is open to you, and ports 443/80 are open to the world.
+1. Provision a Ubuntu linux server in the cloud somewhere. Make sure port 22 is open to you, and ports 443/80 are open to the world.  I recommend at least 2BG of memory, or I had problems provisioning all the K8s components we need.
 2. `sudo apt update & sudo apt full-upgrade -y && sudo reboot now`: Update everything and reboot it for safety
 3. `sudo snap install microk8s --classic`: Install microk8s
 4. `sudo usermod -aG microk8s ubuntu && newgrp microk8s`: Add the `ubuntu` user to the `microk8s` group, so you can run commands without using `sudo`.

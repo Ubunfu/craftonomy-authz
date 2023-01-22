@@ -8,7 +8,7 @@ data:
   CLAIMS_AUD: ''
   SIGNING_KEYSTORE_FILE: ''
   SIGNING_KEYSTORE_PASSWORD: ''
-  DB_CONN_STRING: ''
+  DB_CONN_STRING: 'postgres://USER:PASSWORD@authz-db-service.localhost:5432/authz'
   DEFAULT_SCOPES: ''
   LOG_LEVEL: 'info'
   PORT: '80'
