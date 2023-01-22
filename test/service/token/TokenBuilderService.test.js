@@ -23,7 +23,7 @@ beforeEach(() => {
         jest.fn(() =>  {
             return {
                 id: '1',
-                data: fs.readFileSync('signingKey.pem')
+                data: fs.readFileSync('test/resources/signingKey.pem')
             }
         }));
 });
