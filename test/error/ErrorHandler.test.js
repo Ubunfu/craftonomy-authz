@@ -93,7 +93,7 @@ test('Given ERROR_GETTING_SIGNING_KEY When handle Expect 400: invalid_grant', as
 
 test('Given ERROR_VALIDATING_SUBJECT_TOKEN When handle Expect 400: invalid_grant', async () => {
     const err = {
-        message: errors.ERROR_VALIDATING_SUBJECT_TOKEN
+        message: errors.ERROR_VALIDATING_ID_TOKEN
     }
     const spies = setupMocks();
     handle(err, spies.resMock);

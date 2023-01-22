@@ -1,6 +1,6 @@
 const error = require('../../error/ErrorMessage')
 const winston = require('winston')
-const subjectTokenValidator = require('../validator/SubjectTokenValidatorService');
+const idTokenValidator = require('../validator/IDTokenValidatorService');
 const tokenBuilder = require("./TokenBuilderService");
 const db = require('../db/DatabaseService');
 
@@ -84,14 +84,14 @@ async function buildTokenResponse(token, scopes) {
     };
 }
 
-async function exchangeToken(grantType, clientId, subjectToken, subjectTokenType) {
+async function exchangeToken(grantType, clientId, subjectToken, subjectTokenType, idToken) {
     const appClient = await findAppClient(clientId);
     await validateGrantAuthorizedForApp(appClient.appId, grantType);
-    const subjectTokenInfo = await subjectTokenValidator.getValidatedSubjectTokenInfo(subjectToken);
-    await validateAppAuthorizedForIdp(appClient.appId, subjectTokenInfo.issuer);
-    const userScopes = await findUserScopesByEmail(subjectTokenInfo.email);
+    const idTokenInfo = await idTokenValidator.getValidatedIDTokenInfo(idToken);
+    await validateAppAuthorizedForIdp(appClient.appId, idTokenInfo.issuer);
+    const userScopes = await findUserScopesByEmail(idTokenInfo.email);
     const token = await tokenBuilder.buildAccessToken(
-        clientId, subjectTokenInfo.email, subjectTokenInfo.subject, subjectTokenInfo.username, userScopes);
+        clientId, idTokenInfo.email, idTokenInfo.subject, idTokenInfo.username, userScopes);
     return await buildTokenResponse(token, userScopes);
 }
 

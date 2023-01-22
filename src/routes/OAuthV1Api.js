@@ -12,6 +12,7 @@ router.post('/token', async function(req, res, next) {
         req.body.client_id,
         req.body.subject_token,
         req.body.subject_token_type,
+        req.body.id_token,
     ));
   } catch (e) {
     handle(e, res)
