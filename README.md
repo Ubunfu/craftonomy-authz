@@ -22,6 +22,7 @@ API specifications [located here](https://github.com/Ubunfu/craftonomy-authz/blo
 | DB_CONN_STRING            | The connection string to the backing database.  Defaults to `sqlite::memory`.                                                                                                                                                                                                                                                        | NO        | `postgres://user:pass@example.com:5432/dbname`                |
 | DEFAULT_SCOPES            | A comma-separated list of default scopes that should be assigned to users that don't currently have any scopes assigned (e.g. new registrants).                                                                                                                                                                                      | NO        | `shop.read,servers.read,wallet.read,xp.read`                  |
 | LOG_LEVEL                 | Sets the logging level for the app according to those available by default by the `winston` logging library.  Default logging level is `info`.                                                                                                                                                                                       | NO        | `info`                                                        |
+| PORT                      | Sets the port the server will listen on.  Default is `3000`.                                                                                                                                                                                                                                                                         | NO        | `80`                                                          |
 
 ## Database
 
@@ -48,3 +49,33 @@ least 1 IDP (aka identity provider) which the authorization server allows it to 
 successful authentication.  Users (identified by their email addresses) may be assigned 1 or more "Scope" in 
 the authorization server.  The level of access granted in a token is determined by the Scopes assigned to the user
 who is receiving authorization.
+
+## Kubernetes
+Resources are provided to run this app on Kubernetes.  Doing so has the added benefit of being able to leverage virtual 
+networking with Ingresses, which provide the ability manage running multiple services on as few as 1 node, cleanly 
+support routing to them via custom DNS names (e.g. an authorization server listening to `authz.craftonomy.net:443`, and 
+an API server listening to `api.craftonomy.net:443`) and also support TLS (terminated at the ingress controller).
+
+### Preparing the K8s Server
+1. Provision a Ubuntu linux server in the cloud somewhere. Make sure port 22 is open to you, and ports 443/80 are open to the world.  I recommend at least 2BG of memory, or I had problems provisioning all the K8s components we need.
+2. `sudo apt update & sudo apt full-upgrade -y && sudo reboot now`: Update everything and reboot it for safety
+3. `sudo snap install microk8s --classic`: Install microk8s
+4. `sudo usermod -aG microk8s ubuntu && newgrp microk8s`: Add the `ubuntu` user to the `microk8s` group, so you can run commands without using `sudo`.
+5. `microk8s enable dns ingress hostpath-storage`: Enable the `dns`, `ingress`, and `hostpath-storage` addons for microk8s.
+6. Go generate a signed TLS cert from LetsEncrypt using certbot or similar. We'll need the `fullchain.pem` file and the private key PEM file. 
+7. Clone this repo down to the server
+
+### App - Version Selection
+Set the version of `craftonomy-authz` container image you want to run in `k8s/app/deployment.yaml`
+
+### App - Config
+Provide values for all the envars specified in `k8s/app/configmap.yaml`.  See the config table above for reference.
+
+### App - Ingress TLS Config
+Open up `k8s/app/ingress.yaml`, and in the appropriate spot within the `Secret` definition at the bottom, paste in the 
+base-64 encoded contents of the `fullchain.pem` file containing the full certificate chain issued by your CA (there 
+will probably be multiple certificates in there unless your cert is self-signed).  Do the same with the PEM file 
+containing the private key.
+
+### DB - Config
+Open up `k8s/db/configmap.yaml` and set a username and password for the database user.
