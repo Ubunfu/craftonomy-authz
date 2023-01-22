@@ -96,6 +96,7 @@ components:
         - client_id
         - subject_token
         - subject_token_type
+        - id_token
       properties:
         grant_type:
           type: string
@@ -122,18 +123,22 @@ components:
           type: string
           description: |
             A security token that represents the identity of the party on behalf of whom the request is being made. This 
-            implementation requires that it be a signed, JWT-format, ID token issued by an OIDC-compliant identity
+            implementation requires that it be a signed, JWT-format, refresh token issued by an OIDC-compliant identity
             provider that is trusted by the Craftonomy platform.
           example: |
-            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdF9oYXNoIjoiMnpfRmhOSld6MjRSbkRBb0Q4T3BBUSIsInN1YiI6Ijg1ZTJhNzAwLWZiOGUtNDdiYi05NzBmLWEzYmNjNTI3NTk2MiIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczovL2NvZ25pdG8taWRwLnVzLWVhc3QtMS5hbWF6b25hd3MuY29tL3VzLWVhc3QtMV91OWh2UUF3Mm0iLCJjb2duaXRvOnVzZXJuYW1lIjoicnlhbiIsIm9yaWdpbl9qdGkiOiI5OTI1ZmZmMy1iYTNhLTQwN2UtYWQzNC1mOTI2ZjQ3MWMyOTciLCJhdWQiOiJmaDlva2VnbnZnMGozbmo3Ym80M2VtNTR1IiwiZXZlbnRfaWQiOiI3ZTNmYWQ3Ni1kYzU4LTQyMjItYTA0NS01NGY4NGE1MTcxMTgiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTY2MjI5NjYzMywiZXhwIjoxNjYyMzAwMjMzLCJpYXQiOjE2NjIyOTY2MzQsImp0aSI6IjRhNDRkMjFiLWE2Y2MtNDRjNi05ZWQwLTg0OWMwYWVjYjQ5MyIsImVtYWlsIjoidXNlckBnbWFpbC5jb20ifQ.zXH4TeAvTJpXMu3yo7tazwFW3JsMbaWRtlgFsyEgCHc
+            e7a3c34e-bca2-49f7-9468-64dd8f7d1017
         subject_token_type:
           type: string
           description: |
             An identifier, as described in Section 3 of [RFC8693], that indicates the type of the security token in the 
             subject_token parameter.
           enum:
-            - urn:ietf:params:oauth:token-type:jwt
-          example: urn:ietf:params:oauth:token-type:jwt
+            - urn:ietf:params:oauth:token-type:refresh-token
+          example: urn:ietf:params:oauth:token-type:refresh-token
+        id_token:
+          type: string
+          description: |
+            A JWT format ID token issued by the identity provider which successfully authenticated the user.
     resTokenExchange200:
       type: object
       required:
